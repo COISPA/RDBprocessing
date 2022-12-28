@@ -14,7 +14,7 @@ data=data[-which(data$Maturity_Stage %in%c(NA,-1,0,"")),]
 
 data$mat=ifelse(data$Maturity_Stage %in% imm,0,1)
 
-data2=merge(data,RDBprocessing:::Annex17,by.x="Species",by.y="Scientific_name")
+data2=merge(data,RDBprocessing::Annex17,by.x="Species",by.y="Scientific_name")
 
 data=data2 #[-which(as.character(data2$Species.y)==""),]
 
@@ -27,7 +27,7 @@ tab1=merge(immat,mat,by=c("COUNTRY", "START_YEAR","AREA","SPECIES","SEX","LENGTH
 tab1=tab1[,c(1:7,9,11)]
 colnames(tab1)[c(8,9)]=c("imm","mat")
 
-tab1=merge(tab1,RDBprocessing:::Annex17,by.x="SPECIES",by.y="Species")
+tab1=merge(tab1,RDBprocessing::Annex17,by.x="SPECIES",by.y="Species")
 
 
 tab1$LENGTHCLASS=ifelse(tab1[,11]=="cm",tab1$LENGTHCLASS/10,tab1$LENGTHCLASS)

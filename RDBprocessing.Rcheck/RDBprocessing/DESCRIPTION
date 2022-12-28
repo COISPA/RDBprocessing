@@ -7,13 +7,15 @@ Authors@R:
     person("Walter", "Zupa", , "zupa@coispa.it", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-2058-8652"))       
 Description: The package contains functions used to perform data processing in RDBFIS.
-License: GPL (>= 3.5)
+License: GPL (>= 3)
+Depends: R (>= 4.1.0)
+LazyData: true
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
+VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2022-12-28 14:13:39 UTC; Bitetto Isabella
+Packaged: 2022-12-28 14:40:21 UTC; Walter
 Author: Walter Zupa [aut, cre] (<https://orcid.org/0000-0002-2058-8652>)
 Maintainer: Walter Zupa <zupa@coispa.it>
-Depends: R (>= 3.5.0)
-Built: R 4.2.0; ; 2022-12-28 14:13:44 UTC; windows
+Built: R 4.1.2; ; 2022-12-28 14:40:27 UTC; windows

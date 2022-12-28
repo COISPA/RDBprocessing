@@ -1,6 +1,6 @@
 
-R version 4.2.0 (2022-04-22 ucrt) -- "Vigorous Calisthenics"
-Copyright (C) 2022 The R Foundation for Statistical Computing
+R version 4.1.2 (2021-11-01) -- "Bird Hippie"
+Copyright (C) 2021 The R Foundation for Statistical Computing
 Platform: x86_64-w64-mingw32/x64 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -51,5 +51,77 @@ Type 'q()' to quit R.
 > ### ** Examples
 > 
 > ML_MEDBS(RDBprocessing::data_ex)
-Error: 'data_ex' is not an exported object from 'namespace:RDBprocessing'
+   COUNTRY  AREA START_YEAR END_YEAR SPECIES SEX LENGTHCLASS UNIT SAMPLE_SIZE
+1      ITA GSA99       2014     2014     MUT   M           9   cm         229
+2      ITA GSA99       2015     2015     MUT   M           9   cm         593
+3      ITA GSA99       2016     2016     MUT   M           9   cm         531
+4      ITA GSA99       2017     2017     MUT   M           9   cm         691
+5      ITA GSA99       2015     2015     MUT   F          10   cm         232
+6      ITA GSA99       2016     2016     MUT   F          10   cm         169
+7      ITA GSA99       2017     2017     MUT   F          10   cm         144
+8      ITA GSA99       2014     2014     MUT   M          10   cm         489
+9      ITA GSA99       2015     2015     MUT   M          10   cm         618
+10     ITA GSA99       2016     2016     MUT   M          10   cm         777
+11     ITA GSA99       2017     2017     MUT   M          10   cm         724
+12     ITA GSA99       2014     2014     MUT   F          11   cm         129
+13     ITA GSA99       2015     2015     MUT   F          11   cm         331
+14     ITA GSA99       2016     2016     MUT   F          11   cm         498
+15     ITA GSA99       2017     2017     MUT   F          11   cm         432
+16     ITA GSA99       2014     2014     MUT   M          11   cm         491
+17     ITA GSA99       2015     2015     MUT   M          11   cm         868
+18     ITA GSA99       2016     2016     MUT   M          11   cm         962
+19     ITA GSA99       2017     2017     MUT   M          11   cm         686
+20     ITA GSA99       2014     2014     MUT   F          12   cm         327
+21     ITA GSA99       2015     2015     MUT   F          12   cm         468
+22     ITA GSA99       2016     2016     MUT   F          12   cm         546
+23     ITA GSA99       2017     2017     MUT   F          12   cm         578
+24     ITA GSA99       2017     2017     MUT   M          12   cm         600
+25     ITA GSA99       2016     2016     MUT   F          13   cm         264
+           PRM                             METHOD_USED
+1  0.004366812 Observed proportions (immatures 1,2,2a)
+2  0.075885329 Observed proportions (immatures 1,2,2a)
+3  0.082862524 Observed proportions (immatures 1,2,2a)
+4  0.102749638 Observed proportions (immatures 1,2,2a)
+5  0.086206897 Observed proportions (immatures 1,2,2a)
+6  0.059171598 Observed proportions (immatures 1,2,2a)
+7  0.083333333 Observed proportions (immatures 1,2,2a)
+8  0.186094070 Observed proportions (immatures 1,2,2a)
+9  0.490291262 Observed proportions (immatures 1,2,2a)
+10 0.503217503 Observed proportions (immatures 1,2,2a)
+11 0.378453039 Observed proportions (immatures 1,2,2a)
+12 0.147286822 Observed proportions (immatures 1,2,2a)
+13 0.480362538 Observed proportions (immatures 1,2,2a)
+14 0.208835341 Observed proportions (immatures 1,2,2a)
+15 0.261574074 Observed proportions (immatures 1,2,2a)
+16 0.576374745 Observed proportions (immatures 1,2,2a)
+17 0.894009217 Observed proportions (immatures 1,2,2a)
+18 0.844074844 Observed proportions (immatures 1,2,2a)
+19 0.800291545 Observed proportions (immatures 1,2,2a)
+20 0.746177370 Observed proportions (immatures 1,2,2a)
+21 0.967948718 Observed proportions (immatures 1,2,2a)
+22 0.796703297 Observed proportions (immatures 1,2,2a)
+23 0.877162630 Observed proportions (immatures 1,2,2a)
+24 0.990000000 Observed proportions (immatures 1,2,2a)
+25 0.992424242 Observed proportions (immatures 1,2,2a)
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("ML_MEDBS", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("SRL_MEDBS")
+> ### * SRL_MEDBS
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: SRL_MEDBS
+> ### Title: Sex ratio at length (SRL) table - MED & BS data call
+> ### Aliases: SRL_MEDBS
+> 
+> ### ** Examples
+> 
+> SRL_MEDBS(RDBprocessing::data_ex)
+Error in data$Maturity_Stage %in% imm : object 'imm' not found
+Calls: SRL_MEDBS -> ifelse -> %in%
 Execution halted

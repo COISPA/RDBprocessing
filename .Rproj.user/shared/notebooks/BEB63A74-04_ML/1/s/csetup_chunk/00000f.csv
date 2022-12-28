@@ -1,0 +1,10 @@
+"0",""
+"0","path <- paste(""C:\\Users\\Bitetto Isabella\\OneDrive - Coispa Tecnologia & Ricerca S.C.A.R.L\\MARE22\\STREAM\\FINAL REVISION OF DELIVERABLES\\SDEF_to_DG_MARE_MedBS"", sep="""") "
+"0",""
+"0","setwd(path)"
+"2","Warning:"
+"2"," The working directory was changed to C:/Users/Bitetto Isabella/OneDrive - Coispa Tecnologia & Ricerca S.C.A.R.L/MARE22/STREAM/FINAL REVISION OF DELIVERABLES/SDEF_to_DG_MARE_MedBS inside a notebook chunk. The working directory will be reset when the chunk is finished running. Use the knitr root.dir option in the setup chunk to change the working directory for notebook chunks.
+"
+"0","  "
+"0","knitr::opts_knit$set(root.dir = path)"
+"0",""

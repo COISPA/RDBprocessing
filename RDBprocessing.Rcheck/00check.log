@@ -43,4 +43,35 @@ Undefined global functions or variables:
 * checking Rd line widths ... OK
 * checking Rd cross-references ... OK
 * checking for missing documentation entries ... OK
-* checking for code/documentation mismatches ...
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking contents of 'data' directory ... OK
+* checking data for non-ASCII characters ... OK
+* checking LazyData ... OK
+* checking data for ASCII and uncompressed saves ... OK
+* checking examples ... ERROR
+Running examples in 'RDBprocessing-Ex.R' failed
+The error most likely occurred in:
+
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: RCGtoCOST
+> ### Title: Function converting RCG CS in COST CS object
+> ### Aliases: RCGtoCOST
+> 
+> ### ** Examples
+> 
+> RCGtoCOST(RDBprocessing::data_ex)
+[1] No rows TR = 139
+[1] No rows HH = 139
+[1] No rows SL = 799
+[1] No rows HL = 6040
+Error in getClass(Class, where = topenv(parent.frame())) : 
+  "csData" is not a defined class
+Calls: RCGtoCOST -> new -> getClass
+Execution halted
+* checking for non-standard things in the check directory ... OK
+* checking for detritus in the temp directory ... OK
+* DONE
+Status: 1 ERROR, 1 NOTE

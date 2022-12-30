@@ -3,13 +3,13 @@
 #' @param verbose boolean. If TRUE a message is printed.
 #' @return COST CS object
 #' @export
-#' @examples RCGtoCOST(RDBprocessing::data_ex)
+#' @examples RCGtoCOST_CS(RDBprocessing::data_ex)
 #' @importFrom methods new
 #' @importFrom dplyr mutate
 #' @importFrom magrittr %>%
 #' @importFrom COSTcore csData
 
-RCGtoCOST<-function(data, verbose = FALSE){
+RCGtoCOST_CS<-function(data, verbose = FALSE){
 
 #path.data=getwd()
 

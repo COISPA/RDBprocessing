@@ -2,10 +2,11 @@
 
 export(MA_MEDBS)
 export(ML_MEDBS)
-export(RCGtoCOST)
+export(RCGtoCOST_CS)
 export(SRA_MEDBS)
 export(SRL_MEDBS)
 export(fpKey)
+importFrom(COSTcore,csData)
 importFrom(dplyr,mutate)
 importFrom(magrittr,"%>%")
 importFrom(methods,new)

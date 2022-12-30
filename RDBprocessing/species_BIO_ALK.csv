@@ -1,0 +1,3 @@
+SPECIES;SPE;GSA;SEX;START_YEAR;END_YEAR;LC_RANGE;APPLY_TO_CATCHES_FILE;typeALK;valueALK;methodDesc_LAN.len.age;adjust;SPECON;COMMENTS
+Merluccius merluccius;HKE;GSA99;C;9999;9999;10;Y;stepIncr;10;analytical;T;;
+Mullus barbatus;MUT;GSA99;F_M;9999;9999;10;N;stepIncr;10;analytical;F;;

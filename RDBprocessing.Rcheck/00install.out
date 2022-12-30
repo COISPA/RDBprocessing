@@ -4,14 +4,34 @@
 ** data
 *** moving datasets to lazyload DB
 ** byte-compile and prepare package for lazy loading
+-------------------------------------------------------------------
+ COSTcore - "The DCF Statistical Suite"
+ (Version: 1.4-0. Built on: R 4.1.2; ; 2022-12-28 15:21:16 UTC; windows)
+-------------------------------------------------------------------
 ** help
 *** installing help indices
 ** building package indices
 ** testing if installed package can be loaded from temporary location
 *** arch - i386
+-------------------------------------------------------------------
+ COSTcore - "The DCF Statistical Suite"
+ (Version: 1.4-0. Built on: R 4.1.2; ; 2022-12-28 15:21:16 UTC; windows)
+-------------------------------------------------------------------
 *** arch - x64
+-------------------------------------------------------------------
+ COSTcore - "The DCF Statistical Suite"
+ (Version: 1.4-0. Built on: R 4.1.2; ; 2022-12-28 15:21:16 UTC; windows)
+-------------------------------------------------------------------
 ** testing if installed package can be loaded from final location
 *** arch - i386
+-------------------------------------------------------------------
+ COSTcore - "The DCF Statistical Suite"
+ (Version: 1.4-0. Built on: R 4.1.2; ; 2022-12-28 15:21:16 UTC; windows)
+-------------------------------------------------------------------
 *** arch - x64
+-------------------------------------------------------------------
+ COSTcore - "The DCF Statistical Suite"
+ (Version: 1.4-0. Built on: R 4.1.2; ; 2022-12-28 15:21:16 UTC; windows)
+-------------------------------------------------------------------
 ** testing if installed package keeps a record of temporary installation path
 * DONE (RDBprocessing)

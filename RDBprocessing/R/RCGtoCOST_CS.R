@@ -458,7 +458,7 @@ lenNum <- log_varMsg<- subSampWt<- vslFlgCtry<- NULL
     } else {
 
         print("An error occurred in the trasformation.
-        Impossible to save the CS COST object!")
+        Impossible to create the CS COST object!")
     }
     return(costCS)
 }

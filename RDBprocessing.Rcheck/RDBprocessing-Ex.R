@@ -19,6 +19,25 @@ library('RDBprocessing')
 base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
 base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
 cleanEx()
+nameEx("ALK_MEDBS")
+### * ALK_MEDBS
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: ALK_MEDBS
+### Title: Age Length Key (ALK) table - MED & BS data call
+### Aliases: ALK_MEDBS
+
+### ** Examples
+
+ALK_MEDBS(RDBprocessing::data_ex)
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("ALK_MEDBS", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
 nameEx("MA_MEDBS")
 ### * MA_MEDBS
 
@@ -57,24 +76,43 @@ ML_MEDBS(RDBprocessing::data_ex)
 base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
 base::cat("ML_MEDBS", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
 cleanEx()
-nameEx("RCGtoCOST")
-### * RCGtoCOST
+nameEx("RCGtoCOST_CL")
+### * RCGtoCOST_CL
 
 flush(stderr()); flush(stdout())
 
 base::assign(".ptime", proc.time(), pos = "CheckExEnv")
-### Name: RCGtoCOST
-### Title: Function converting RCG CS in COST CS object
-### Aliases: RCGtoCOST
+### Name: RCGtoCOST_CL
+### Title: Function converting RCG CL in COST CL object
+### Aliases: RCGtoCOST_CL
 
 ### ** Examples
 
-RCGtoCOST(RDBprocessing::data_ex)
+RCGtoCOST_CL(RDBprocessing::data_exampleCL)
 
 
 
 base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
-base::cat("RCGtoCOST", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+base::cat("RCGtoCOST_CL", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("RCGtoCOST_CS")
+### * RCGtoCOST_CS
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: RCGtoCOST_CS
+### Title: Function converting RCG CS in COST CS object
+### Aliases: RCGtoCOST_CS
+
+### ** Examples
+
+RCGtoCOST_CS(RDBprocessing::data_ex)
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("RCGtoCOST_CS", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
 cleanEx()
 nameEx("SRA_MEDBS")
 ### * SRA_MEDBS

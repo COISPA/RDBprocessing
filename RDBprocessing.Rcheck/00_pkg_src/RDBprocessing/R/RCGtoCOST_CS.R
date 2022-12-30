@@ -3,13 +3,13 @@
 #' @param verbose boolean. If TRUE a message is printed.
 #' @return COST CS object
 #' @export
-#' @examples RCGtoCOST(RDBprocessing::data_ex)
+#' @examples RCGtoCOST_CS(RDBprocessing::data_ex)
 #' @importFrom methods new
 #' @importFrom dplyr mutate
 #' @importFrom magrittr %>%
 #' @importFrom COSTcore csData
 
-RCGtoCOST<-function(data, verbose = FALSE){
+RCGtoCOST_CS<-function(data, verbose = FALSE){
 
 #path.data=getwd()
 
@@ -458,7 +458,7 @@ lenNum <- log_varMsg<- subSampWt<- vslFlgCtry<- NULL
     } else {
 
         print("An error occurred in the trasformation.
-        Impossible to save the CS COST object!")
+        Impossible to create the CS COST object!")
     }
     return(costCS)
 }

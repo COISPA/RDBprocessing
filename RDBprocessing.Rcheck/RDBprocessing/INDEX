@@ -1,12 +1,15 @@
+ALK_MEDBS               Age Length Key (ALK) table - MED & BS data call
 Annex17                 Annex 1.7
 MA_MEDBS                Maturity at age (MA) table - MED & BS data call
 ML_MEDBS                Maturity at length (ML) table - MED & BS data
                         call
-RCGtoCOST               Function converting RCG CS in COST CS object
+RCGtoCOST_CL            Function converting RCG CL in COST CL object
+RCGtoCOST_CS            Function converting RCG CS in COST CS object
 SRA_MEDBS               Sex ratio at age (SRA) table - MED & BS data
                         call
 SRL_MEDBS               Sex ratio at length (SRL) table - MED & BS data
                         call
 data_ex                 RCG CS example
+data_exampleCL          RCG CL example
 fpKey                   Function to create a key from the fields of a
                         table

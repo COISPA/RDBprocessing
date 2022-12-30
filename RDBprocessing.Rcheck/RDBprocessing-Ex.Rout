@@ -34,148 +34,33 @@ Type 'q()' to quit R.
 > 
 > ### * </HEADER>
 > library('RDBprocessing')
+-------------------------------------------------------------------
+ COSTcore - "The DCF Statistical Suite"
+ (Version: 1.4-0. Built on: R 4.1.2; ; 2022-12-28 15:21:16 UTC; windows)
+-------------------------------------------------------------------
 > 
 > base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
 > base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
 > cleanEx()
-> nameEx("MA_MEDBS")
-> ### * MA_MEDBS
+> nameEx("ALK_MEDBS")
+> ### * ALK_MEDBS
 > 
 > flush(stderr()); flush(stdout())
 > 
 > base::assign(".ptime", proc.time(), pos = "CheckExEnv")
-> ### Name: MA_MEDBS
-> ### Title: Maturity at age (MA) table - MED & BS data call
-> ### Aliases: MA_MEDBS
+> ### Name: ALK_MEDBS
+> ### Title: Age Length Key (ALK) table - MED & BS data call
+> ### Aliases: ALK_MEDBS
 > 
 > ### ** Examples
 > 
-> MA_MEDBS(RDBprocessing::data_ex)
-   COUNTRY  AREA START_YEAR END_YEAR SPECIES SEX AGECLASS SAMPLE_SIZE
-1      ITA GSA99       2015     2015     MUT   F        0           7
-2      ITA GSA99       2016     2016     MUT   F        0          10
-3      ITA GSA99       2017     2017     MUT   F        0          11
-4      ITA GSA99       2015     2015     MUT   M        0          13
-5      ITA GSA99       2016     2016     MUT   M        0          38
-6      ITA GSA99       2017     2017     MUT   M        0          13
-7      ITA GSA99       2014     2014     MUT   F        1          98
-8      ITA GSA99       2015     2015     MUT   F        1          68
-9      ITA GSA99       2016     2016     MUT   F        1         192
-10     ITA GSA99       2017     2017     MUT   F        1          97
-11     ITA GSA99       2014     2014     MUT   M        1          80
-12     ITA GSA99       2015     2015     MUT   M        1          55
-13     ITA GSA99       2016     2016     MUT   M        1         145
-14     ITA GSA99       2017     2017     MUT   M        1         106
-          PRM                             METHOD_USED
-1  0.71428571 Observed proportions (immatures 1,2,2a)
-2  0.30000000 Observed proportions (immatures 1,2,2a)
-3  0.09090909 Observed proportions (immatures 1,2,2a)
-4  0.53846154 Observed proportions (immatures 1,2,2a)
-5  0.78947368 Observed proportions (immatures 1,2,2a)
-6  0.15384615 Observed proportions (immatures 1,2,2a)
-7  0.47959184 Observed proportions (immatures 1,2,2a)
-8  0.67647059 Observed proportions (immatures 1,2,2a)
-9  0.70833333 Observed proportions (immatures 1,2,2a)
-10 0.34020619 Observed proportions (immatures 1,2,2a)
-11 0.72500000 Observed proportions (immatures 1,2,2a)
-12 0.94545455 Observed proportions (immatures 1,2,2a)
-13 0.71034483 Observed proportions (immatures 1,2,2a)
-14 0.36792453 Observed proportions (immatures 1,2,2a)
-> 
-> 
-> 
-> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
-> base::cat("MA_MEDBS", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
-> cleanEx()
-> nameEx("ML_MEDBS")
-> ### * ML_MEDBS
-> 
-> flush(stderr()); flush(stdout())
-> 
-> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
-> ### Name: ML_MEDBS
-> ### Title: Maturity at length (ML) table - MED & BS data call
-> ### Aliases: ML_MEDBS
-> 
-> ### ** Examples
-> 
-> ML_MEDBS(RDBprocessing::data_ex)
-   COUNTRY  AREA START_YEAR END_YEAR SPECIES SEX LENGTHCLASS UNIT SAMPLE_SIZE
-1      ITA GSA99       2014     2014     MUT   M           9   cm         229
-2      ITA GSA99       2015     2015     MUT   M           9   cm         593
-3      ITA GSA99       2016     2016     MUT   M           9   cm         531
-4      ITA GSA99       2017     2017     MUT   M           9   cm         691
-5      ITA GSA99       2015     2015     MUT   F          10   cm         232
-6      ITA GSA99       2016     2016     MUT   F          10   cm         169
-7      ITA GSA99       2017     2017     MUT   F          10   cm         144
-8      ITA GSA99       2014     2014     MUT   M          10   cm         489
-9      ITA GSA99       2015     2015     MUT   M          10   cm         618
-10     ITA GSA99       2016     2016     MUT   M          10   cm         777
-11     ITA GSA99       2017     2017     MUT   M          10   cm         724
-12     ITA GSA99       2014     2014     MUT   F          11   cm         129
-13     ITA GSA99       2015     2015     MUT   F          11   cm         331
-14     ITA GSA99       2016     2016     MUT   F          11   cm         498
-15     ITA GSA99       2017     2017     MUT   F          11   cm         432
-16     ITA GSA99       2014     2014     MUT   M          11   cm         491
-17     ITA GSA99       2015     2015     MUT   M          11   cm         868
-18     ITA GSA99       2016     2016     MUT   M          11   cm         962
-19     ITA GSA99       2017     2017     MUT   M          11   cm         686
-20     ITA GSA99       2014     2014     MUT   F          12   cm         327
-21     ITA GSA99       2015     2015     MUT   F          12   cm         468
-22     ITA GSA99       2016     2016     MUT   F          12   cm         546
-23     ITA GSA99       2017     2017     MUT   F          12   cm         578
-24     ITA GSA99       2017     2017     MUT   M          12   cm         600
-25     ITA GSA99       2016     2016     MUT   F          13   cm         264
-           PRM                             METHOD_USED
-1  0.004366812 Observed proportions (immatures 1,2,2a)
-2  0.075885329 Observed proportions (immatures 1,2,2a)
-3  0.082862524 Observed proportions (immatures 1,2,2a)
-4  0.102749638 Observed proportions (immatures 1,2,2a)
-5  0.086206897 Observed proportions (immatures 1,2,2a)
-6  0.059171598 Observed proportions (immatures 1,2,2a)
-7  0.083333333 Observed proportions (immatures 1,2,2a)
-8  0.186094070 Observed proportions (immatures 1,2,2a)
-9  0.490291262 Observed proportions (immatures 1,2,2a)
-10 0.503217503 Observed proportions (immatures 1,2,2a)
-11 0.378453039 Observed proportions (immatures 1,2,2a)
-12 0.147286822 Observed proportions (immatures 1,2,2a)
-13 0.480362538 Observed proportions (immatures 1,2,2a)
-14 0.208835341 Observed proportions (immatures 1,2,2a)
-15 0.261574074 Observed proportions (immatures 1,2,2a)
-16 0.576374745 Observed proportions (immatures 1,2,2a)
-17 0.894009217 Observed proportions (immatures 1,2,2a)
-18 0.844074844 Observed proportions (immatures 1,2,2a)
-19 0.800291545 Observed proportions (immatures 1,2,2a)
-20 0.746177370 Observed proportions (immatures 1,2,2a)
-21 0.967948718 Observed proportions (immatures 1,2,2a)
-22 0.796703297 Observed proportions (immatures 1,2,2a)
-23 0.877162630 Observed proportions (immatures 1,2,2a)
-24 0.990000000 Observed proportions (immatures 1,2,2a)
-25 0.992424242 Observed proportions (immatures 1,2,2a)
-> 
-> 
-> 
-> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
-> base::cat("ML_MEDBS", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
-> cleanEx()
-> nameEx("RCGtoCOST")
-> ### * RCGtoCOST
-> 
-> flush(stderr()); flush(stdout())
-> 
-> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
-> ### Name: RCGtoCOST
-> ### Title: Function converting RCG CS in COST CS object
-> ### Aliases: RCGtoCOST
-> 
-> ### ** Examples
-> 
-> RCGtoCOST(RDBprocessing::data_ex)
+> ALK_MEDBS(RDBprocessing::data_ex)
 [1] No rows TR = 139
 [1] No rows HH = 139
 [1] No rows SL = 799
 [1] No rows HL = 6040
-Error in getClass(Class, where = topenv(parent.frame())) : 
-  "csData" is not a defined class
-Calls: RCGtoCOST -> new -> getClass
+[1] No rows CA = 55401
+Error in seq(sel_spe$START_YEAR[i], sel_spe$END_YEAR[i], by = 1) : 
+  object 'sel_spe' not found
+Calls: ALK_MEDBS ... subsetCOST -> eval -> eval -> eval -> eval -> %in% -> seq
 Execution halted

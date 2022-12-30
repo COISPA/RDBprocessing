@@ -177,11 +177,6 @@ ALK_MEDBS<-function(data, verbose = FALSE) {
           aa$LC<-as.numeric(aa$LC)/10
           UNIT1<-"cm"
       }
-
-      if (UNIT %in% c("scm", "SCM")& sel_spe$LC_RANGE[i]==5) {
-          aa$LC<-as.numeric(aa$LC)/10
-          UNIT1<-"cm"
-      }
         round_any = function(x, accuracy, f=round){f(x/ accuracy) * accuracy}
 
       aa$LC<- round_any( aa$LC,1,floor)
@@ -274,8 +269,6 @@ colnames(alk.temp2)=as.vector(header)
 
   }
   alk.temp2=alk.temp2[alk.temp2$AGE!=-1,]
-
-
 return(alk.temp2)
 
 }

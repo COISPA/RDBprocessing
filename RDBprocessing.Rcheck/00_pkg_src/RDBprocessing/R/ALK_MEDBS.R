@@ -5,14 +5,31 @@
 #' @return ALK table
 #' @export
 #' @examples ALK_MEDBS(RDBprocessing::data_ex)
-#' @importFrom data.table last first between
+#' @importFrom data.table last first between as.data.table
 #' @importFrom stats as.formula
 #' @import COSTcore COSTeda COSTdbe
-#' @importFrom dplyr group_by filter select
+#' @importFrom dplyr group_by filter select summarize mutate_at one_of if_else
+#' @importFrom tidyr gather
 
 ALK_MEDBS<-function(data, verbose = FALSE) {
+
+year<-n<-vars<-.<-funs<-Start<-End<-NULL
+
+    data$Age=round(data$Age,0)
+    data[is.na(data)]<-""
+    data$Individual_weight=""
+    data$fish_ID=""
+    data$Maturity_Stage=""
+
+    data2=aggregate(data$Number_at_length, by=list(data$Sampling_type,data$Flag_country,data$Year,data$Trip_code,data$Harbour,data$Number_of_sets_hauls_on_trip,data$Days_at_sea,data$Sampling_method,data$Aggregation_level,data$Station_number,data$Duration_of_fishing_operation,data$Initial_latitude,data$Initial_longitude,data$Final_latitude,data$Final_longitude,data$Depth_of_fishing_operation,data$Water_depth,data$Catch_registration,data$Species_registration,data$Date,data$Area,data$Fishing_activity_category_National,data$Fishing_activity_category_European_lvl_6,data$Species,data$Catch_category,data$Weight,data$Subsample_weight,data$Sex,data$Maturity_method,data$Maturity_scale,data$Maturity_Stage,data$Ageing.method,data$Age,data$Length_code,data$Length_class,data$Commercial_size_category_scale,data$Commercial_size_category,data$fish_ID,data$Individual_weight), FUN="sum")
+    data2=data2[,c(1:35,40,36:39)]
+    colnames(data2)=colnames(RDBprocessing::data_ex)
+
+
+    data2[data2$Age=="",]$Age<-NA
+
     #data=data[!is.na(data$Age),]
-    fri_cs<-RCGtoCOST_CS(data)
+    fri_cs<-RCGtoCOST_CS(data2)
     LC<- age<- area<- logMsg<- n.at.len<- sex<- spp<- value<-NULL
 
     header<-c("COUNTRY","AREA","START_YEAR","END_YEAR","SPECON","SPECIES","SEX","APPLY_TO_CATCHES_FILE","TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE","CV","UNIT","AGE" ,paste("LENGTHCLASS",seq(0,99),sep=""),"LENGTHCLASS100_PLUS","COMMENTS")
@@ -48,8 +65,11 @@ ALK_MEDBS<-function(data, verbose = FALSE) {
 
       STK<- sel_spe$SPECIES[i]
 
-      fri_cs1<- subset(fri_cs, year%in% seq(sel_spe$START_YEAR[i],
-                                            sel_spe$END_YEAR[i],by=1),table="ca",link=T)
+      Start<<-sel_spe$START_YEAR[i]
+      End<<-sel_spe$END_YEAR[i]
+
+      fri_cs1<- subset(fri_cs, year %in% seq(Start,
+                                            End,by=1),table="ca",link=T)
 
       #  estimate sample size (number of otoliths per stock, sex and age)
       if (sel_spe$SEX[i]=="C"){
@@ -177,6 +197,11 @@ ALK_MEDBS<-function(data, verbose = FALSE) {
           aa$LC<-as.numeric(aa$LC)/10
           UNIT1<-"cm"
       }
+
+      if (UNIT %in% c("scm", "SCM")& sel_spe$LC_RANGE[i]==5) {
+          aa$LC<-as.numeric(aa$LC)/10
+          UNIT1<-"cm"
+      }
         round_any = function(x, accuracy, f=round){f(x/ accuracy) * accuracy}
 
       aa$LC<- round_any( aa$LC,1,floor)
@@ -268,7 +293,10 @@ colnames(alk.temp2)=as.vector(header)
       }
 
   }
+
   alk.temp2=alk.temp2[alk.temp2$AGE!=-1,]
+
+  alk.temp2[is.na(alk.temp2$CV),]$CV=-1
 return(alk.temp2)
 
 }

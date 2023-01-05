@@ -8,6 +8,7 @@
 #' @importFrom dplyr mutate
 #' @importFrom magrittr %>%
 #' @importFrom COSTcore csData
+#' @importFrom lubridate quarter month
 
 RCGtoCOST_CS<-function(data, verbose = FALSE){
 
@@ -18,10 +19,13 @@ error <- FALSE
 dataset_proj <- ""
 bad.rm <- FALSE
 log_var  <- TRUE
-lenNum <- log_varMsg<- subSampWt<- vslFlgCtry<- NULL
+lenNum <- log_varMsg<- subSampWt<- vslFlgCtry<- log_varCs<-NULL
 
+Date=format(as.Date(CS$Date, format = "%d/%m/%Y"), "%Y-%m-%d")
+if (!all(is.na(Date))) {
+    CS$Date=Date
 
-
+}
 
     names(CS)[which(tolower(names(CS)) == "sampling.type")] <- "sampType"
     names(CS)[which(tolower(names(CS)) == "sampling_type")] <- "sampType"
@@ -431,11 +435,42 @@ lenNum <- log_varMsg<- subSampWt<- vslFlgCtry<- NULL
             costCS.CA<-  costCS.CA[,CA.col]
             costCS.CA$indWt <- -1
 
+            merge=merge(costCS.CA,costCS.HH,by="trpCode")
+
+            merge$quarter=quarter(as.Date(merge$date))
+            merge$month=month(as.Date(merge$date))
+
+
+
+            trip= unique(merge$trpCode)
+
+            for (tr in trip){
+                costCS.CA[costCS.CA$trpCode==tr,]$quarter=merge[merge$trpCode==tr,]$quarter
+                costCS.CA[costCS.CA$trpCode==tr,]$month=merge[merge$trpCode==tr,]$month
+            }
+
+
+
         } else {
 
             missCA <- CA.col[!CA.col %in% names(csCa)]
             costCS.CA <- csCa
             costCS.CA[ , missCA] <- NA
+
+            merge=merge(costCS.CA,costCS.HH,by="trpCode")
+
+            merge$quarter=quarter(as.Date(merge$date))
+            merge$month=month(as.Date(merge$date))
+
+
+
+            trip= unique(merge$trpCode)
+
+            for (tr in trip){
+                costCS.CA[costCS.CA$trpCode==tr,]$quarter=merge[merge$trpCode==tr,]$quarter
+                costCS.CA[costCS.CA$trpCode==tr,]$month=merge[merge$trpCode==tr,]$month
+            }
+
 
             costCS.CA$proj<- dataset_proj
             costCS.CA$landCtry<-costCS.CA$vslFlgCtry
@@ -450,6 +485,10 @@ lenNum <- log_varMsg<- subSampWt<- vslFlgCtry<- NULL
        # write.table(costCS.CA, file.path(path.data, "SDEF CS-CA data.csv"),
                     #sep = ";", row.names = FALSE)
 
+        costCS.CA$quarter<- factor(costCS.CA$quarter, levels = c(1,2,3,4))
+
+        costCS.CA$month<- factor(costCS.CA$month, levels = c(1,2,3,4,5,6,7,8,9,10,11,12))
+
         costCS = csData(tr =costCS.TR, hh = costCS.HH, sl = costCS.SL,
                         hl = costCS.HL, ca=costCS.CA)
 
@@ -460,5 +499,9 @@ lenNum <- log_varMsg<- subSampWt<- vslFlgCtry<- NULL
         print("An error occurred in the trasformation.
         Impossible to create the CS COST object!")
     }
+
+
+
+
     return(costCS)
 }

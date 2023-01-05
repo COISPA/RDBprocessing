@@ -59,8 +59,7 @@ Type 'q()' to quit R.
 [1] No rows HH = 139
 [1] No rows SL = 799
 [1] No rows HL = 6040
-[1] No rows CA = 55401
-Error in seq(sel_spe$START_YEAR[i], sel_spe$END_YEAR[i], by = 1) : 
-  object 'sel_spe' not found
-Calls: ALK_MEDBS ... subsetCOST -> eval -> eval -> eval -> eval -> %in% -> seq
+[1] No rows CA = 6587
+Error in eval(subset, tab) : object 'sel_spe' not found
+Calls: ALK_MEDBS ... .local -> subsetCOST -> eval -> eval -> eval -> eval
 Execution halted

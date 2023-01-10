@@ -1,0 +1,113 @@
+---
+title: "README"
+author: "Bitetto Isabella - COISPA"
+date: "`r Sys.Date()`"
+output: github_document
+vignette: >
+  %\VignetteIndexEntry{RDBqc: Quality checks on RDBFIS data formats}
+  %\VignetteEngine{knitr::knitr}
+  %\usepackage[UTF-8]{inputenc}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(RDBprocessing)
+
+```
+
+RDBprocessing allows to convert the RCG Med & BS Regional Coordination Group Mediterranean and Black Sea) CL and CS formats in the aggregated data formats required by the MEDBS, FDI and GFCM data calls.
+
+Specifically, the version `r packageVersion("RDBprocessing")` supports the following tables for the Med & BS data call:
+
+-   LANDINGS
+-   DISCARDS
+-   ALK
+-   SRL
+-   SRA
+-   ML
+-   MA
+-   CATCH
+
+Input: Example of Regional Coordination Group Mediterranean & Black Sea data formats:
+
+**CS table**
+
+```{r input1}
+head(data_ex)
+```
+
+**CL table**
+
+```{r input2}
+head(data_exampleCL)
+```
+**CE table**
+
+```{r input}
+head(ce_example)
+```
+
+# LAND_MEDBS
+
+This function `LAND_MEDBS` raises the length frequency distribution observed in the biological sampling (RCG CS table) to the landing (RCG CL table) according to the stratification of the quarter, the GSA (GFCM sensu) and the metier DCF as a default.
+
+```{r input3}
+LAND_MEDBS(RDBprocessing::data_ex,RDBprocessing::data_exampleCL)
+```
+
+# DISC_MEDBS
+
+This function `DISC_MEDBS` estimates the discard volume and raises the length frequency distribution observed in the biological sampling (RCG CS table) to it (RCG CL table and CE effort table RDB format) according to the stratification of the quarter, the GSA (GFCM sensu) and the metier DCF as a default.
+
+```{r input4}
+DISC_MEDBS(RDBprocessing::data_ex,RDBprocessing::data_exampleCL,RDBprocessing::ce_example)
+```
+
+# CATCH_MEDBS
+
+This function `CATCH_MEDBS` estimates discard volume and estimates the age distributions of landing and discard raising the age structure observed in the biological sampling (RCG CS table), using landing and effort data  (RCG CL table and CE effort table RDB format) according to the stratification of the quarter, the GSA (GFCM sensu) and the metier DCF as a default.
+
+```{r input5}
+CATCH_MEDBS(RDBprocessing::data_ex,RDBprocessing::data_exampleCL,RDBprocessing::ce_example)
+```
+
+# ALK_MEDBS
+
+This function `ALK_MEDBS` estimates the age-length key on the basis of the data collected in the observed in the biological sampling (RCG CS table) by year and sex (F, M and C).
+
+```{r input6}
+ALK_MEDBS(RDBprocessing::data_ex)
+```
+
+# ML_MEDBS
+
+This function `ML_MEDBS` estimates the maturity at length vector on the basis of the data collected in the observed in the biological sampling (RCG CS table) by year and sex (F, M).
+
+```{r input7}
+ML_MEDBS(RDBprocessing::data_ex)
+```
+# MA_MEDBS
+
+This function `ML_MEDBS` estimates the maturity at age vector on the basis of the data collected in the observed in the biological sampling (RCG CS table) by year and sex (F, M).
+
+```{r input8}
+MA_MEDBS(RDBprocessing::data_ex)
+```
+# SRL_MEDBS
+
+This function `SRL_MEDBS` estimates the sex ratio (as F/F+M) at length vector on the basis of the data collected in the observed in the biological sampling (RCG CS table) by year and sex (F, M).
+
+```{r input9}
+ML_MEDBS(RDBprocessing::data_ex)
+```
+# SRA_MEDBS
+
+This function `SRA_MEDBS` estimates the sex ratio (as F/F+M) at age vector on the basis of the data collected in the observed in the biological sampling (RCG CS table) by year and sex (F, M).
+
+```{r input10}
+SRA_MEDBS(RDBprocessing::data_ex)
+```

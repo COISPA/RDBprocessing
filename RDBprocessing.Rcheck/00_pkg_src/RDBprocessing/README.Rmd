@@ -1,0 +1,54 @@
+---
+title: "README"
+author: "Bitetto Isabella - COISPA"
+date: "`r Sys.Date()`"
+output: github_document
+vignette: >
+  %\VignetteIndexEntry{RDBqc: Quality checks on RDBFIS data formats}
+  %\VignetteEngine{knitr::knitr}
+  %\usepackage[UTF-8]{inputenc}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(RDBprocessing)
+```
+
+RDBprocessing allows to convert the RCG Med & BS Regional Coordination Group Mediterranean and Black Sea) CL and CS formats in the aggregated data formats required by the MEDBS, FDI and GFCM data calls.
+
+Specifically, the version `r packageVersion("RDBprocessing")` supports the following tables for the Med & BS data call:
+
+-   LANDINGS
+-   DISCARDS
+-   ALK
+-   SRL
+-   SRA
+-   ML
+-   MA
+-   CATCH
+
+Input: Example of Regional Coordination Group Mediterranean & Black Sea data formats:
+
+**CS table**
+
+```{r input1}
+head(data_ex)
+```
+
+**CL table**
+
+```{r input2}
+head(data_exampleCL)
+```
+
+# LAND_MEDBS
+
+This function `LAND_MEDBS` raises the length frequency distribution observed in the biological sampling (RCG CS table) to the landing (RCG CL table) according to the stratification of the quarter, the GSA (GFCM sensu) and the metier DCF as a default.
+
+```{r input2}
+LAND_MEDBS(RDBprocessing::data_ex,RDBprocessing::data_exampleCL)
+```

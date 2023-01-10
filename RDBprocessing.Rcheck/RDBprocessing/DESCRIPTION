@@ -18,7 +18,7 @@ Imports: dplyr, COSTeda, COSTcore, COSTdbe, magrittr, methods,
 Suggests: rmarkdown, knitr, markdown
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-01-04 22:15:27 UTC; Bitetto Isabella
+Packaged: 2023-01-10 14:49:22 UTC; Bitetto Isabella
 Author: Walter Zupa [aut, cre] (<https://orcid.org/0000-0002-2058-8652>)
 Maintainer: Walter Zupa <zupa@coispa.it>
-Built: R 4.1.1; ; 2023-01-04 22:15:40 UTC; windows
+Built: R 4.1.1; ; 2023-01-10 14:49:35 UTC; windows

@@ -68,7 +68,7 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
       Start<<-sel_spe$START_YEAR[i]
       End<<-sel_spe$END_YEAR[i]
 
-      fri_cs1<- subset(fri_cs, year %in% seq(Start,
+      fri_cs1<- COSTcore::subset(fri_cs, year %in% seq(Start,
                                             End,by=1),table="ca",link=T)
 
       #  estimate sample size (number of otoliths per stock, sex and age)
@@ -297,6 +297,7 @@ colnames(alk.temp2)=as.vector(header)
   alk.temp2=alk.temp2[alk.temp2$AGE!=-1,]
 
   alk.temp2[is.na(alk.temp2$CV),]$CV=-1
-return(alk.temp2)
+
+  return(alk.temp2)
 
 }

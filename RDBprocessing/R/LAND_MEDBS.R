@@ -10,7 +10,7 @@
 #' @import COSTeda
 #' @importFrom COSTdbe dbeObject RaiseLgth
 #' @importFrom COSTcore subsetSpp
-#' @importFrom dplyr rename left_join bind_rows
+#' @importFrom dplyr rename left_join bind_rows vars funs
 #' @importFrom plyr round_any
 #' @importFrom data.table as.data.table
 #' @importFrom tidyr separate
@@ -19,7 +19,7 @@
 
 LAND_MEDBS<-function(datacs,datacl,verbose=FALSE){
 
-FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUARTER<- SPECIES<- VESSEL_LENGTH<- VL<- Year<- fishery<- gear<- id <- space<- stock<- technical<- value<-vars<-funs<-.<-NULL
+FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUARTER<- SPECIES<- VESSEL_LENGTH<- VL<- Year<- fishery<- gear<- id <- space<- stock<- technical<- value<-.<-NULL
 
 
 
@@ -74,7 +74,7 @@ FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUA
     sel_spe[sel_spe$UNIT=="mm",]$LC_RANGE=1
 }
 
-
+i=1
     for (i in 1:dim(sel_spe)[1]) {
 
         STK<- sel_spe$SPECIES[i]
@@ -162,9 +162,9 @@ FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUA
 
         colnames(bb)=c("time","space","technical","length","value")
 
-        ab=left_join(bb,aa ,by = c("time", "space", "technical"))
+        ab=dplyr::left_join(bb,aa ,by = c("time", "space", "technical"))
 
-        ab<- ab %>% separate(technical, c("gear","FISHERY","MESH_SIZE_RANGE"),
+        ab<- ab %>% tidyr::separate(technical, c("gear","FISHERY","MESH_SIZE_RANGE"),
                              sep = "_",remove=F)
 
         ab<-cbind(ab[,c(1:5)],rep(NA,nrow(ab)),ab[,c(6:9)])
@@ -173,13 +173,13 @@ FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUA
 
         ab$length<- as.numeric(as.character(ab$length))
 
-        ab<- ab%>% group_by(time,   space , gear  ,FISHERY, VL,MESH_SIZE_RANGE  ) %>%
-            mutate(minlc=min(length,na.rm=T),maxlc=max(length,na.rm=T))
+        ab<- ab%>% dplyr::group_by(time,   space , gear  ,FISHERY, VL,MESH_SIZE_RANGE  ) %>%
+            dplyr::mutate(minlc=min(length,na.rm=T),maxlc=max(length,na.rm=T))
 
         # matrix with all combinations of "time"   "space"  "gear"   "VL"
         # "length" ,"MESH_SIZE_RANGE"
 
-        dt <- as.data.table(ab)
+        dt <- data.table::as.data.table(ab)
 
         dt[,c(1:7)][is.na(dt[,c(1:7)])]<- -1
 
@@ -190,7 +190,7 @@ FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUA
 
         dt1<- dt[, list(length = seq_l), by = id]
 
-        dt1<- dt1 %>% separate(id, c("time", "space", "gear", "FISHERY","VL",
+        dt1<- dt1 %>% tidyr::separate(id, c("time", "space", "gear", "FISHERY","VL",
                                      "MESH_SIZE_RANGE"), sep = ":")
 
 
@@ -210,14 +210,14 @@ FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUA
 
         dt3=dt3[complete.cases(dt3[,c(7:9)]), ]
 
-        dt3 <- dt3 %>% separate(time, c("Year","Quarter")," - ")
+        dt3 <- dt3 %>% tidyr::separate(time, c("Year","Quarter")," - ")
 
         dt3$MESH_SIZE_RANGE<-as.character(dt3$MESH_SIZE_RANGE)
 
 
         # numbers at LC : NA-->0
-        dt3<- dt3 %>% mutate_at(vars( -(Year:stock) ),
-                                funs( if_else( is.na(.), 0, .) ) )
+        dt3<- dt3 %>% dplyr::mutate_at(dplyr::vars( -(Year:stock) ),
+                                dplyr::funs( dplyr::if_else( is.na(.), 0, .) ) )
 
 
         LANDINGS <- data.frame(
@@ -240,7 +240,7 @@ FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUA
 
 
 
-        LANDINGS<-left_join(LANDINGS,dt3[,-c(1,3,8:11)],by=c( "QUARTER"  ="Quarter" ,
+        LANDINGS<- dplyr::left_join(LANDINGS,dt3[,-c(1,3,8:11)],by=c( "QUARTER"  ="Quarter" ,
                                                               "GEAR"="gear" ,  "VESSEL_LENGTH" = "VL"  ,
                                                               "MESH_SIZE_RANGE","FISHERY" ))
 
@@ -253,7 +253,7 @@ FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUA
 
             LANDINGS$LENGTHCLASS100_PLUS<- rowSums(LANDINGS[,!1:113])
 
-            LANDINGS<-LANDINGS %>% select(ID:LENGTHCLASS99,LENGTHCLASS100_PLUS)
+            LANDINGS<-LANDINGS %>% dplyr::select(ID:LENGTHCLASS99,LENGTHCLASS100_PLUS)
         }
 
 
@@ -270,7 +270,7 @@ FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUA
                                                                RDBprocessing::msr$DGMARE_Med_BS_codification_MSR)]
         # species to FAO three alpha code and set ID (COUNTRY, AREA, GEAR, VESSEL_LENGTH,
         # MESH_SIZE_RANGE,QUARTER, SPECIES)
-        land.tab <-LANDINGS %>% mutate(ID = paste(COUNTRY, AREA, GEAR,FISHERY, VESSEL_LENGTH,
+        land.tab <-LANDINGS %>% dplyr::mutate(ID = paste(COUNTRY, AREA, GEAR,FISHERY, VESSEL_LENGTH,
                                                   MESH_SIZE_RANGE,YEAR, QUARTER, SPECIES, sep = "_"))
 
         lan.temp2<-data.frame(matrix(nrow=0,ncol=length(header)))

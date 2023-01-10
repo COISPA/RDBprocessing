@@ -24,7 +24,7 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
     # datace=ce_example
 
 
-    FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUARTER<- SPECIES<- VESSEL_LENGTH<- VL<- Year<- fishery<- gear<- id <- space<- stock<- technical<- value<-vars<-funs<-.<-NULL
+    FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUARTER<- SPECIES<- VESSEL_LENGTH<- VL<- Year<- fishery<- gear<- id <- space<- stock<- technical<- value<-.<-NULL
 
     fri_cs1<-RCGtoCOST_CS(datacs)
     fri_cl1<-RCGtoCOST_CL(datacl)

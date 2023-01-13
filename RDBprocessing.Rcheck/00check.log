@@ -1,5 +1,5 @@
-* using log directory 'D:/Documents and Settings/Utente/Documenti/GitHub/RDBprocessing/RDBprocessing.Rcheck'
-* using R version 4.1.2 (2021-11-01)
+* using log directory 'C:/RDBprocessing/RDBprocessing.Rcheck'
+* using R version 4.1.1 (2021-08-10)
 * using platform: x86_64-w64-mingw32 (64-bit)
 * using session charset: ISO8859-1
 * using options '--no-manual --as-cran'
@@ -37,7 +37,7 @@
 * checking R code for possible problems ... NOTE
 -------------------------------------------------------------------
  COSTcore - "The DCF Statistical Suite"
- (Version: 1.4-0. Built on: R 4.1.2; ; 2022-12-28 15:16:42 UTC; windows)
+ (Version: 1.4-0. Built on: R 4.1.2; ; 2022-12-28 15:21:16 UTC; windows)
 -------------------------------------------------------------------
 CATCH_MEDBS: warning in set(catch.temp2, i = which(catch.temp2[[jj]] ==
   -1), j = jj, v = 0): confronto argomento parziale di 'v' con 'value'

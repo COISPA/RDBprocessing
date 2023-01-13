@@ -15,6 +15,7 @@
 ALK_MEDBS<-function(data) {
 
 if (FALSE) {
+  # library(RDBprocessing)
     # library(COSTcore)
     # library(COSTdbe)
     # library(COSTeda)
@@ -42,7 +43,7 @@ if (FALSE) {
 
     #data=data[!is.na(data$Age),]
     fri_cs<-RCGtoCOST_CS(data2)
-    sel_spe <- LC<- age<- area<- logMsg<- n.at.len<- sex<- spp<- value<-NULL
+    LC<- age<- area<- logMsg<- n.at.len<- sex<- spp<- value<-NULL
 
     header<-c("COUNTRY","AREA","START_YEAR","END_YEAR","SPECON","SPECIES","SEX","APPLY_TO_CATCHES_FILE","TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE","CV","UNIT","AGE" ,paste("LENGTHCLASS",seq(0,99),sep=""),"LENGTHCLASS100_PLUS","COMMENTS")
 
@@ -75,7 +76,7 @@ if (FALSE) {
 
   i=1
   for (i in 1:dim(sel_spe)[1]) {
-
+# print(i)
       STK<- sel_spe$SPECIES[i]
 
       Start<<-sel_spe$START_YEAR[i]
@@ -108,7 +109,7 @@ if (FALSE) {
 
       fri_csv1<- subSetSpp(fri_csv, STK)
       fri_csv1<- subset(fri_csv1, area%in% sel_spe$GSA[i],table="ca",link=T)
-      fri_csc1 <- csDataCons(fri_csv1, fri_strD)
+      fri_csc1 <- suppressWarnings(csDataCons(fri_csv1, fri_strD))
 
        ## ### CV from individual length-at-age
       LEstim_An <-
@@ -163,13 +164,13 @@ if (FALSE) {
 
       if (sel_spe$SEX[i]=="C"){
 
-          dfALK <- suppressWarnings( dfALK %>%
+          dfALK <- suppressMessages( dfALK %>%
               left_join(nml, by = c("AREA" = 'area', 'SPECIES' = 'spp',"AGE"="age")) %>%
               dplyr::mutate(SPECIES =  sel_spe$SPE[i]))
           # FAO Three alpha code
       } else{
 
-          dfALK <- suppressWarnings( dfALK %>%
+          dfALK <- suppressMessages( dfALK %>%
               left_join(nml, by = c("AREA" = 'area', 'SPECIES' = 'spp',"AGE"="age",
                                     "SEX"="sex")) %>%
               dplyr::mutate(SPECIES =  sel_spe$SPE[i]) )
@@ -232,7 +233,7 @@ if (FALSE) {
       dt1<- aa1[, list(LC = seq_l), by = age]
 
 
-      dt2<- left_join(dt1,aa1)
+      dt2<- suppressMessages (left_join(dt1,aa1))
 
       dt3 <- data.table::dcast(dt2,as.formula(paste(paste(names(dt2)[! names(dt2)
                                                                      %in% c("LC","n.at.len")], collapse='+'), "LC", sep="~")),
@@ -244,15 +245,15 @@ if (FALSE) {
       dt3<- dt3 %>% mutate_at(vars( -(age) ),
                               funs( if_else( is.na(.), 0, .) ) )
 
-      dfALK<-left_join(dfALK,dt3,by=c("AGE"="age"))
+      dfALK<- suppressMessages (left_join(dfALK,dt3,by=c("AGE"="age")))
 
       ## CV
       # LEstim_An @ageNum$ cv
 
       LEstim_An@ageNum[["cv"]]$age=as.numeric(LEstim_An@ageNum[["cv"]]$age)
 
-      dfALK<- dfALK%>% left_join(LEstim_An@ageNum[["cv"]]%>% select(age,value),
-                                 by=c( "AGE"="age"))%>% dplyr::mutate(CV=value)%>% select(-c(value))
+      dfALK<- suppressMessages( dfALK%>% left_join(LEstim_An@ageNum[["cv"]]%>% select(age,value),
+                                 by=c( "AGE"="age"))%>% dplyr::mutate(CV=value)%>% select(-c(value)))
 
       # take care of number of Length classes (max is 100 acc. to DG MARE Med&BS template)
       zz<-dim(dfALK[-c(1:14)])[2]

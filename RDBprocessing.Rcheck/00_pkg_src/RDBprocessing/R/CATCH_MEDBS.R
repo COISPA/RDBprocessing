@@ -19,6 +19,8 @@
 
 CATCH_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
 
+    datacs=check_cs_header(datacs)
+
   # datacs=data_ex
   # datacl=data_exampleCL
   # datace=ce_example

@@ -9,6 +9,7 @@
 
 MA_MEDBS<-function(data,imm=c("1","2","2a"), verbose = FALSE) {
 
+    data=check_cs_header(data)
     header=c("COUNTRY","AREA","START_YEAR","END_YEAR","SPECIES","SEX","AGECLASS","SAMPLE_SIZE","PRM","METHOD_USED")
 
     data=data[-which(data$Maturity_Stage %in% c(NA,-1,0,"") | data$Age %in% c(NA,-1,"")),]

@@ -8,6 +8,7 @@
 #' @examples LAND_MEDBS(RDBprocessing::data_ex,RDBprocessing::data_exampleCL)
 #' @importFrom stats complete.cases
 #' @import COSTeda
+#' @import COSTcore
 #' @importFrom COSTdbe dbeObject RaiseLgth
 #' @importFrom COSTcore subsetSpp
 #' @importFrom dplyr rename left_join bind_rows vars funs
@@ -19,6 +20,7 @@
 
 LAND_MEDBS<-function(datacs,datacl,verbose=FALSE){
 
+    datacs=check_cs_header(datacs)
 FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUARTER<- SPECIES<- VESSEL_LENGTH<- VL<- Year<- fishery<- gear<- id <- space<- stock<- technical<- value<-.<-NULL
 
 

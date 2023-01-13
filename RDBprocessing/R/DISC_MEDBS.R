@@ -23,6 +23,7 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
     # datacl=data_exampleCL
     # datace=ce_example
 
+    datacs=check_cs_header(datacs)
 
     FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUARTER<- SPECIES<- VESSEL_LENGTH<- VL<- Year<- fishery<- gear<- id <- space<- stock<- technical<- value<-.<-NULL
 

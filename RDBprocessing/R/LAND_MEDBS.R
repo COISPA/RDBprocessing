@@ -8,6 +8,7 @@
 #' @examples LAND_MEDBS(RDBprocessing::data_ex,RDBprocessing::data_exampleCL)
 #' @importFrom stats complete.cases
 #' @import COSTeda
+#' @import COSTcore
 #' @importFrom COSTdbe dbeObject RaiseLgth
 #' @importFrom COSTcore subsetSpp
 #' @importFrom dplyr rename left_join bind_rows vars funs
@@ -45,7 +46,7 @@ FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUA
 
     #fri_cs1@hh$time="00:00-23:59"
 
-     fri_csc <- csDataCons(fri_csv, fri_strD1)
+     fri_csc <- suppressWarnings(csDataCons(fri_csv, fri_strD1))
 
 
      fri_clv <- clDataVal(fri_cl1)
@@ -162,10 +163,10 @@ i=1
 
         colnames(bb)=c("time","space","technical","length","value")
 
-        ab=dplyr::left_join(bb,aa ,by = c("time", "space", "technical"))
+        ab=  suppressMessages(dplyr::left_join(bb,aa ,by = c("time", "space", "technical")))
 
-        ab<- ab %>% tidyr::separate(technical, c("gear","FISHERY","MESH_SIZE_RANGE"),
-                             sep = "_",remove=F)
+        ab<- suppressWarnings(ab %>% tidyr::separate(technical, c("gear","FISHERY","MESH_SIZE_RANGE"),
+                             sep = "_",remove=F))
 
         ab<-cbind(ab[,c(1:5)],rep(NA,nrow(ab)),ab[,c(6:9)])
         #, "VL"
@@ -190,14 +191,14 @@ i=1
 
         dt1<- dt[, list(length = seq_l), by = id]
 
-        dt1<- dt1 %>% tidyr::separate(id, c("time", "space", "gear", "FISHERY","VL",
-                                     "MESH_SIZE_RANGE"), sep = ":")
+        dt1<- suppressWarnings(dt1 %>% tidyr::separate(id, c("time", "space", "gear", "FISHERY","VL",
+                                     "MESH_SIZE_RANGE"), sep = ":"))
 
 
         ab[is.na(ab)]<- -1
         class(dt1$VL)<-"numeric"
 
-        dt2<- dplyr::left_join(dt1,ab)
+        dt2<- suppressMessages(dplyr::left_join(dt1,ab))
 
         dt2$stock<- STK
 
@@ -210,7 +211,7 @@ i=1
 
         dt3=dt3[complete.cases(dt3[,c(7:9)]), ]
 
-        dt3 <- dt3 %>% tidyr::separate(time, c("Year","Quarter")," - ")
+        dt3 <- suppressWarnings(dt3 %>% tidyr::separate(time, c("Year","Quarter")," - "))
 
         dt3$MESH_SIZE_RANGE<-as.character(dt3$MESH_SIZE_RANGE)
 
@@ -240,10 +241,10 @@ i=1
 
 
 
-        LANDINGS<- dplyr::left_join(LANDINGS,dt3[,-c(1,3,8:11)],by=c( "QUARTER"  ="Quarter" ,
+        LANDINGS<- suppressMessages(dplyr::left_join(LANDINGS,dt3[,-c(1,3,8:11)],by=c( "QUARTER"  ="Quarter" ,
                                                               "GEAR"="gear" ,  "VESSEL_LENGTH" = "VL"  ,
                                                               "MESH_SIZE_RANGE","FISHERY" ))
-
+)
         # take care of number of Length classes (max is 100 acc. to DG MARE Med&BS template)
         zz<-dim(LANDINGS[-c(1:13)])[2]
         names(LANDINGS)[-c(1:13)]<- paste("LENGTHCLASS",seq(0,zz-1,1),sep="")

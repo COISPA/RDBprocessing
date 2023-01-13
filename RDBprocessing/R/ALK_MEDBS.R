@@ -1,7 +1,6 @@
 #' Age Length Key (ALK) table - MED & BS data call
 #'
 #' @param data Detailed data in RCG CS format
-#' @param verbose boolean. If TRUE a message is printed.
 #' @return ALK table
 #' @export
 #' @examples ALK_MEDBS(RDBprocessing::data_ex)
@@ -10,10 +9,24 @@
 #' @import COSTcore COSTeda COSTdbe
 #' @importFrom dplyr group_by filter select summarize mutate_at one_of if_else
 #' @importFrom tidyr gather
+#' @importFrom magrittr %>%
+#' @importFrom plyr .
 
-ALK_MEDBS<-function(data, verbose = FALSE) {
+ALK_MEDBS<-function(data) {
 
-year<-n<-vars<-.<-funs<-Start<-End<-NULL
+if (FALSE) {
+  # library(RDBprocessing)
+    # library(COSTcore)
+    # library(COSTdbe)
+    # library(COSTeda)
+    # library(dplyr)
+    # library(tidyr)
+    # library(data.table)
+    data <- RDBprocessing::data_ex
+  }
+
+
+. <- year<-n<-Start<-End<-NULL  # vars<-.<-funs<-
 
     data$Age=round(data$Age,0)
     data[is.na(data)]<-""
@@ -61,8 +74,9 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
   sel_spe$COMMENTS <-""
   sel_spe$LC_RANGE <-10
 
+  i=1
   for (i in 1:dim(sel_spe)[1]) {
-
+# print(i)
       STK<- sel_spe$SPECIES[i]
 
       Start<<-sel_spe$START_YEAR[i]
@@ -76,9 +90,9 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
 
           fri_csv <- csDataVal(fri_cs1)
 
-          nml<- data.frame(fri_cs1@ca) %>% filter(!is.na(age))%>%
+          nml<- suppressMessages ( data.frame(fri_cs1@ca) %>% dplyr::filter(!is.na(age))%>%
               dplyr::group_by(area,spp,age)%>%
-              dplyr::summarize(TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE=n())
+              dplyr::summarize(TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE=n()) )
 
       } else { # ALK for selected sex
 
@@ -86,16 +100,16 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
           fri_csv <- csDataVal(fri_cs1)
 
           # get sample size: number of otoliths
-          nml<- data.frame(fri_cs1@ca) %>% filter(!is.na(age))%>%
+          nml<- suppressMessages ( data.frame(fri_cs1@ca) %>% dplyr::filter(!is.na(age))%>%
               dplyr::group_by(area,spp,age,sex)%>%
-              summarize(TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE=n())
+            dplyr::summarize(TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE=n()) )
 
       }
 
 
       fri_csv1<- subSetSpp(fri_csv, STK)
       fri_csv1<- subset(fri_csv1, area%in% sel_spe$GSA[i],table="ca",link=T)
-      fri_csc1 <- csDataCons(fri_csv1, fri_strD)
+      fri_csc1 <- suppressWarnings(csDataCons(fri_csv1, fri_strD))
 
        ## ### CV from individual length-at-age
       LEstim_An <-
@@ -150,16 +164,16 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
 
       if (sel_spe$SEX[i]=="C"){
 
-          dfALK <-  dfALK %>%
+          dfALK <- suppressMessages( dfALK %>%
               left_join(nml, by = c("AREA" = 'area', 'SPECIES' = 'spp',"AGE"="age")) %>%
-              dplyr::mutate(SPECIES =  sel_spe$SPE[i])
+              dplyr::mutate(SPECIES =  sel_spe$SPE[i]))
           # FAO Three alpha code
       } else{
 
-          dfALK <-  dfALK %>%
+          dfALK <- suppressMessages( dfALK %>%
               left_join(nml, by = c("AREA" = 'area', 'SPECIES' = 'spp',"AGE"="age",
                                     "SEX"="sex")) %>%
-              dplyr::mutate(SPECIES =  sel_spe$SPE[i])
+              dplyr::mutate(SPECIES =  sel_spe$SPE[i]) )
           # FAO Three alpha code
 
       }
@@ -211,7 +225,7 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
 
       dfALK$UNIT<-UNIT1
 
-      aa1=aa %>%  gather(age, n.at.len, -LC)
+      aa1=aa %>%  tidyr::gather(age, n.at.len, -LC)
 
       aa1 <- as.data.table(aa1)
 #aa$LC
@@ -219,7 +233,7 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
       dt1<- aa1[, list(LC = seq_l), by = age]
 
 
-      dt2<- left_join(dt1,aa1)
+      dt2<- suppressMessages (left_join(dt1,aa1))
 
       dt3 <- data.table::dcast(dt2,as.formula(paste(paste(names(dt2)[! names(dt2)
                                                                      %in% c("LC","n.at.len")], collapse='+'), "LC", sep="~")),
@@ -231,15 +245,15 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
       dt3<- dt3 %>% mutate_at(vars( -(age) ),
                               funs( if_else( is.na(.), 0, .) ) )
 
-      dfALK<-left_join(dfALK,dt3,by=c("AGE"="age"))
+      dfALK<- suppressMessages (left_join(dfALK,dt3,by=c("AGE"="age")))
 
       ## CV
       # LEstim_An @ageNum$ cv
 
       LEstim_An@ageNum[["cv"]]$age=as.numeric(LEstim_An@ageNum[["cv"]]$age)
 
-      dfALK<- dfALK%>% left_join(LEstim_An@ageNum[["cv"]]%>% select(age,value),
-                                 by=c( "AGE"="age"))%>% dplyr::mutate(CV=value)%>% select(-c(value))
+      dfALK<- suppressMessages( dfALK%>% left_join(LEstim_An@ageNum[["cv"]]%>% select(age,value),
+                                 by=c( "AGE"="age"))%>% dplyr::mutate(CV=value)%>% select(-c(value)))
 
       # take care of number of Length classes (max is 100 acc. to DG MARE Med&BS template)
       zz<-dim(dfALK[-c(1:14)])[2]
@@ -292,12 +306,18 @@ colnames(alk.temp2)=as.vector(header)
 
       }
 
+      if (i ==1) {
+        alk.temp3 <-  alk.temp2
+      } else {
+        alk.temp3 <- rbind( alk.temp3,  alk.temp2)
+      }
+
   }
 
-  alk.temp2=alk.temp2[alk.temp2$AGE!=-1,]
+  alk.temp3=alk.temp3[alk.temp3$AGE!=-1,]
 
-  alk.temp2[is.na(alk.temp2$CV),]$CV=-1
+  alk.temp3[is.na(alk.temp3$CV),]$CV=-1
 
-  return(alk.temp2)
+  return(alk.temp3)
 
 }

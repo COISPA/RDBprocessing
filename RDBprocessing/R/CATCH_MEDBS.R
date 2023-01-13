@@ -19,13 +19,12 @@
 
 CATCH_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
 
+  # datacs=data_ex
+  # datacl=data_exampleCL
+  # datace=ce_example
 
-    . <-id<- Dis<- FISHERY<- GEAR<- ID<- LANDINGS<- Lan<- MESH_SIZE_RANGE<- NO_AGE_MEASUREMENTS_DISCARDS<- NO_AGE_MEASUREMENTS_LANDINGS <-   NO_LENGTH_MEASUREMENTS_DISCARDS <- NO_LENGTH_MEASUREMENTS_LANDINGS<-   NO_SAMPLES_DISCARDS <- NO_SAMPLES_LANDINGS<- QUARTER<- SPECIES<- VESSEL_LENGTH<- VL<- Year<- age<- area<- catchCat<- foCatEu6<- funs<- gear<- id<-   lenCls<- meanW.at.age<- n <-n.at.age<-  space<- spp<- stock<- technical<-    trpCode<- value<- vars<- year <- NULL
+    . <-.id <- id<- Dis<- FISHERY<- GEAR<- ID<- LANDINGS<- Lan<- MESH_SIZE_RANGE<- NO_AGE_MEASUREMENTS_DISCARDS<- NO_AGE_MEASUREMENTS_LANDINGS <-   NO_LENGTH_MEASUREMENTS_DISCARDS <- NO_LENGTH_MEASUREMENTS_LANDINGS<-   NO_SAMPLES_DISCARDS <- NO_SAMPLES_LANDINGS<- QUARTER<- SPECIES<- VESSEL_LENGTH<- VL<- Year<- age<- area<- catchCat<- foCatEu6<- funs<- gear<- id<-   lenCls<- meanW.at.age<- n <-n.at.age<-  space<- spp<- stock<- technical<-    trpCode<- value<- vars<- year <- NULL
 
-
-    # datacs=data_ex
-    # datacl=data_exampleCL
-    # datace=ce_example
     if (nrow(datacs[which(as.numeric(datacs$Age)>=20),])>0)   datacs[datacs$Age>=20,]$Age=20
     datacs$Age=round(datacs$Age,0)
     datacs[is.na(datacs)]<-""
@@ -59,9 +58,9 @@ CATCH_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
     fri_clv <- clDataVal(fri_cl1)
     fri_cev <- ceDataVal(fri_ce1)
 
-    fri_csc <- csDataCons(fri_csv, fri_strD1)
-    fri_clc <- clDataCons(fri_clv, fri_strD1)
-    fri_cec <- ceDataCons(fri_cev, fri_strD1)
+    fri_csc <- suppressWarnings( csDataCons(fri_csv, fri_strD1) )
+    fri_clc <- suppressWarnings( clDataCons(fri_clv, fri_strD1) )
+    fri_cec <- suppressWarnings( ceDataCons(fri_cev, fri_strD1) )
 
 
 
@@ -153,6 +152,7 @@ CATCH_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
 
   ### error if sp-quarter-gear-VL not found in both CS and CL
 
+  i=1
   for (i in 1:dim(sel_spe)[1]) {
 
 
@@ -229,8 +229,8 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
           DIS_dbe <- totVolume(DIS_dbe,fri_csc1,fri_cec1, type=sel_spe$type[i])
       }
 
-      DIS_dbe <- RaiseAge(DIS_dbe, fri_csc1, fri_clc1,type = sel_spe$typeALK[i],
-                          strataDesc = fri_strD1)
+      DIS_dbe <- suppressWarnings(RaiseAge(DIS_dbe, fri_csc1, fri_clc1,type = sel_spe$typeALK[i],
+                          strataDesc = fri_strD1))
 
       # CATCH1 :  cols ID: MAX_AGE --------------------------------------------------------
 
@@ -245,25 +245,25 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
 
       if (!is.na(sel_spe$mcrs[i]) & sel_spe$mcrs[i]!=".") { # MCRS
 
-          no.samples<- data.frame(newhl) %>% filter(lenCls<=sel_spe$mcrs[i]) %>%
+          no.samples<- suppressWarnings( data.frame(newhl) %>% filter(lenCls<=sel_spe$mcrs[i]) %>%
               dplyr::group_by(time,space,technical,catchCat)%>%
-              summarize(value=n_distinct(trpCode))
+              summarize(value=n_distinct(trpCode)))
 
           no.samples<- no.samples%>% tidyr::spread(catchCat,value)
 
-          L.no.samples<- no.samples%>% select(-Dis)%>% rename("value"=Lan)
-          D.no.samples<- no.samples%>% select(-Lan)%>% rename("value"=Dis)
+          L.no.samples<- suppressWarnings(no.samples%>% select(-Dis)%>% rename("value"=Lan))
+          D.no.samples<- suppressWarnings(no.samples%>% select(-Lan)%>% rename("value"=Dis))
 
       } else {
 
-          no.samples<- data.frame(newhl) %>%
+          no.samples<- suppressMessages( data.frame(newhl) %>%
               dplyr::group_by(time,space,technical,catchCat)%>%
-              summarize(value=n_distinct(trpCode))
+              summarize(value=n_distinct(trpCode)) )
 
           no.samples<- no.samples%>% tidyr::spread(catchCat,value)
 
-          L.no.samples<- no.samples%>% select(-Dis)%>% rename("value"=Lan)
-          D.no.samples<- no.samples%>% select(-Lan)%>% rename("value"=Dis)
+          L.no.samples<- suppressWarnings(no.samples%>% select(-Dis)%>% rename("value"=Lan))
+          D.no.samples<- suppressWarnings(no.samples%>% select(-Lan)%>% rename("value"=Dis))
       }
 
       # MCRS : no age and len measur. for LAN < MCRS----------------------
@@ -276,18 +276,18 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
               rename("space"=area, "technical"=foCatEu6) %>%
               mutate(time=paste(year, quarter, sep=" - ")) %>% filter( spp==STK)
 
-          no.age.meas.lan.mcrs<- data.frame(newca) %>%
+          no.age.meas.lan.mcrs<- suppressWarnings(  data.frame(newca) %>%
               filter(lenCls<=sel_spe$mcrs[i]&!is.na(age)&catchCat=="LAN" )%>%
-              dplyr::group_by(time,space,technical)%>% summarize(value=n())
+              dplyr::group_by(time,space,technical)%>% summarize(value=n()) )
 
           # remove technical if all ==NA
           no.age.meas.lan.mcrs<- no.age.meas.lan.mcrs[,!apply(is.na(no.age.meas.lan.mcrs), 2, all)]
 
           # No len measurements LAN
 
-          no.len.meas.lan.mcrs<- data.frame(newca) %>%
+          no.len.meas.lan.mcrs<- suppressWarnings(  data.frame(newca) %>%
               filter(lenCls<=sel_spe$mcrs[i]&!is.na(lenCls)&catchCat=="LAN")%>%
-              dplyr::group_by(time,space,technical)%>% summarize(value=n())
+              dplyr::group_by(time,space,technical)%>% summarize(value=n()) )
 
       }
 
@@ -330,7 +330,7 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
 
       all.merge= tidyr::spread(list..merge,key=.id,value=value)
 
-      all.merge <- all.merge%>% mutate( "stock"=STK) %>% select(stock,everything())
+      all.merge <- suppressWarnings(all.merge%>% mutate( "stock"=STK) %>% select(stock,everything()))
 
       # delete rows (age...) with no "technical": a number should be given only
       # if it relates to this fishery only
@@ -361,11 +361,11 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
 
       bbd<-rename(bbd, "DIS.n.at.age"=value)
 
-      ab<- left_join(bb,bbd) %>% left_join(aa.len)
+      ab<- suppressMessages(suppressMessages(left_join(bb,bbd) %>% left_join(aa.len)))
 
 
-      ab<- ab %>% separate(technical, c("gear","FISHERY","MESH_SIZE_RANGE"),
-                           sep = "_")
+      ab<- suppressWarnings(ab %>% separate(technical, c("gear","FISHERY","MESH_SIZE_RANGE"),
+                           sep = "_"))
 
       # min age/ max age----------------------------------------------------------
       ab<-cbind(ab[,c(1:5)],rep(NA,nrow(ab)),ab[,c(6:21)])
@@ -413,7 +413,7 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
 
       # if mcrs delete LANDINGS: estimated below
       if (!is.na(sel_spe$mcrs[i]) & sel_spe$mcrs[i]!="."){
-          catch1<-catch1 %>% select(-LANDINGS)
+          catch1<- suppressWarnings(catch1 %>% select(-LANDINGS))
       }
 
       # ### >>>>>>>>>. catch1: no samples & no meas.  ---------------------------
@@ -452,9 +452,9 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
                                    "VL","MESH_SIZE_RANGE"), sep = ":")
       class(dt1$VL)<-"numeric"
       #dt1[is.na(dt1$VL),]$VL=-1
-      dt2=left_join(dt1,ab %>% select("time" , "space", "gear" , "FISHERY",
+      dt2=suppressMessages(suppressWarnings(left_join(dt1,ab %>% select("time" , "space", "gear" , "FISHERY",
                                       "VL" , "MESH_SIZE_RANGE","age","n.at.age",
-                                      "DIS.n.at.age","stock" ))
+                                      "DIS.n.at.age","stock" ))))
 
       dt2$stock=STK
 
@@ -488,8 +488,8 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
 
       cc$age=as.numeric(as.character(cc$age))
       cc=rename(cc, "meanW.at.age"=value)
-      cc=cc %>% separate(technical, c("gear", "FISHERY","MESH_SIZE_RANGE"),
-                         sep = "_")
+      cc= suppressWarnings( cc %>% separate(technical, c("gear", "FISHERY","MESH_SIZE_RANGE"),
+                         sep = "_"))
       cc<-cbind(cc[,c(1:5)],rep(NA,nrow(cc)),cc[,c(6:7)])
       #, "VL"
       colnames(cc)[6]="VL"
@@ -526,8 +526,8 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
 
       ff$age=as.numeric(as.character(ff$age))
       ff=rename(ff, "meanL.at.age"=value)
-      ff=ff %>% separate(technical, c("gear","FISHERY","MESH_SIZE_RANGE"),
-                         sep = "_")
+      ff= suppressWarnings( ff %>% separate(technical, c("gear","FISHERY","MESH_SIZE_RANGE"),
+                         sep = "_"))
       ff<-cbind(ff[,c(1:5)],rep(NA,nrow(ff)),ff[,c(6:7)])
       #, "VL"
       colnames(ff)[6]="VL"
@@ -561,8 +561,8 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
 
       ccD$age=as.numeric(as.character(ccD$age))
       ccD=rename(ccD, "DmeanW.at.age"=value)
-      ccD=ccD %>% separate(technical, c("gear", "FISHERY","MESH_SIZE_RANGE"),
-                           sep = "_")
+      ccD=suppressWarnings(  ccD %>% separate(technical, c("gear", "FISHERY","MESH_SIZE_RANGE"),
+                           sep = "_") )
 
       ccD<-cbind(ccD[,c(1:5)],rep(NA,nrow(ccD)),ccD[,c(6:7)])
       #, "VL"
@@ -595,8 +595,8 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
 
       ffD$age=as.numeric(as.character(ffD$age))
       ffD=rename(ffD, "DmeanL.at.age"=value)
-      ffD=ffD %>% separate(technical, c("gear", "FISHERY","MESH_SIZE_RANGE"),
-                           sep = "_")
+      ffD=suppressWarnings(  ffD %>% separate(technical, c("gear", "FISHERY","MESH_SIZE_RANGE"),
+                           sep = "_") )
 
       ffD<-cbind(ffD[,c(1:5)],rep(NA,nrow(ffD)),ffD[,c(6:7)])
       #, "VL"
@@ -639,12 +639,12 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
       if (!is.na(sel_spe$mcrs[i]) & sel_spe$mcrs[i]!="."){
 
           # tonnes
-          landings <- cfdt2 %>% mutate(LANDINGS= meanW.at.age*n.at.age) %>%
-              select(time, space, gear, FISHERY, VL, MESH_SIZE_RANGE,LANDINGS)
+          landings <- suppressWarnings(cfdt2 %>% mutate(LANDINGS= meanW.at.age*n.at.age) %>%
+              select(time, space, gear, FISHERY, VL, MESH_SIZE_RANGE,LANDINGS))
 
           landings <- landings[!is.na(landings$LANDINGS ), ]
 
-          dt3<-left_join(dt3,landings)
+          dt3<- suppressMessages(left_join(dt3,landings))
 
       }
 
@@ -700,7 +700,7 @@ if (as.character(sel_spe$YEAR[i] %in% years)){
 
 colnames(dt3)[c(1,2,3,4,6)]=c("YEAR","QUARTER","AREA","GEAR","VESSEL_LENGTH")
 
-      catch.tab <- left_join(catch1,dt3,by=c( "QUARTER" ,  "YEAR",  "AREA", "GEAR" ,  "VESSEL_LENGTH", "FISHERY", "MESH_SIZE_RANGE"))
+      catch.tab <- suppressMessages( left_join(catch1,dt3,by=c( "QUARTER" ,  "YEAR",  "AREA", "GEAR" ,  "VESSEL_LENGTH", "FISHERY", "MESH_SIZE_RANGE")) )
 
       # FISHERY to DG MARE Med&BS codification
       catch.tab$FISHERY <- RDBprocessing::fishery$SDEF_codification[match(catch.tab$FISHERY ,
@@ -740,7 +740,7 @@ colnames(dt3)[c(1,2,3,4,6)]=c("YEAR","QUARTER","AREA","GEAR","VESSEL_LENGTH")
 
 
 
-  catch.temp2<-  catch.temp2 %>% select(header2)
+  catch.temp2<-  suppressWarnings(catch.temp2 %>% select(header2))
 
   colnames(catch.temp2)=header
 

@@ -4,12 +4,10 @@
 \alias{ALK_MEDBS}
 \title{Age Length Key (ALK) table - MED & BS data call}
 \usage{
-ALK_MEDBS(data, verbose = FALSE)
+ALK_MEDBS(data)
 }
 \arguments{
 \item{data}{Detailed data in RCG CS format}
-
-\item{verbose}{boolean. If TRUE a message is printed.}
 }
 \value{
 ALK table

@@ -36,14 +36,14 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
     fri_strD1 <- strIni(timeStrata="quarter", techStrata = "foCatEu6",
                         spaceStrata = "area")
 
-    fri_csv <- csDataVal(fri_cs1)
-    fri_clv <- clDataVal(fri_cl1)
-    fri_cev <- ceDataVal(fri_ce1)
+    fri_csv <- suppressWarnings(csDataVal(fri_cs1))
+    fri_clv <- suppressWarnings(clDataVal(fri_cl1))
+    fri_cev <- suppressWarnings(ceDataVal(fri_ce1))
 
 
-    fri_csc <- csDataCons(fri_csv, fri_strD1)
-    fri_clc <- clDataCons(fri_clv, fri_strD1)
-    fri_cec <- ceDataCons(fri_cev, fri_strD1)
+    fri_csc <- suppressWarnings(csDataCons(fri_csv, fri_strD1))
+    fri_clc <- suppressWarnings(clDataCons(fri_clv, fri_strD1))
+    fri_cec <- suppressWarnings(ceDataCons(fri_cev, fri_strD1))
 
 
     header=c("ID","COUNTRY","YEAR","QUARTER","VESSEL_LENGTH","GEAR","MESH_SIZE_RANGE","FISHERY","AREA","SPECON", "SPECIES","DISCARDS","UNIT",paste("LENGTHCLASS",seq(0,99),sep=""),"LENGTHCLASS100_PLUS")
@@ -67,6 +67,7 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
         sel_spe[sel_spe$UNIT=="mm",]$LC_RANGE=1
     }
 
+    i=1
         for (i in 1:dim(sel_spe)[1]) {
 
             STK<- sel_spe$SPECIES[i]
@@ -150,10 +151,10 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
             bb<-aggregate(bb$value,by=list(bb$time,bb$space,bb$technical,bb$length),FUN="sum")
             colnames(bb)=c("time","space","technical","length","value")
 
-            ab=left_join(bb,aa ,by = c("time", "space", "technical"))
+            ab= suppressMessages(left_join(bb,aa ,by = c("time", "space", "technical")))
 
-            ab<- ab %>% separate(technical, c("gear","FISHERY", "MESH_SIZE_RANGE"),
-                                 sep = "_",remove=T)
+            ab<- suppressWarnings(ab %>% separate(technical, c("gear","FISHERY", "MESH_SIZE_RANGE"),
+                                 sep = "_",remove=T))
 
 
             ab<-cbind(ab[,c(1:5)],rep(NA,nrow(ab)),ab[,c(6:8)])
@@ -179,8 +180,8 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
 
             dt1<- dt[, list(length = seq_l), by = id]
 
-            dt1<- dt1 %>% separate(id, c("time", "space", "gear", "FISHERY","VL",
-                                         "MESH_SIZE_RANGE"), sep = ":")
+            dt1<- suppressWarnings(dt1 %>% separate(id, c("time", "space", "gear", "FISHERY","VL",
+                                         "MESH_SIZE_RANGE"), sep = ":"))
 
             ab[is.na(ab)]<- -1
             class(dt1$VL)<-"numeric"
@@ -190,7 +191,7 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
                                               funs( ifelse( is.na(.), -1, .) ) )
 
 
-            dt2<- dplyr::left_join(dt1,ab)
+            dt2<- suppressMessages(dplyr::left_join(dt1,ab))
             dt2$stock<- STK
 
             ##
@@ -201,7 +202,7 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
 
             dt3=dt3[complete.cases(dt3[,c(7:9)]), ]
 
-            dt3 <- dt3 %>% separate(time, c("Year","Quarter")," - ")
+            dt3 <- suppressWarnings(dt3 %>% separate(time, c("Year","Quarter")," - "))
 
             dt3$MESH_SIZE_RANGE<-as.character(dt3$MESH_SIZE_RANGE)
 
@@ -227,8 +228,8 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
                 UNIT = UNIT1
             )
 
-            DISCARDS<-left_join(DISCARDS,dt3[,-c(1,3,8:11)],by=c( "QUARTER"  ="Quarter" ,
-                                                                  "GEAR"="gear" ,  "VESSEL_LENGTH" = "VL"  ,"MESH_SIZE_RANGE","FISHERY" ))
+            DISCARDS<- suppressMessages(left_join(DISCARDS,dt3[,-c(1,3,8:11)],by=c( "QUARTER"  ="Quarter" ,
+                                                                  "GEAR"="gear" ,  "VESSEL_LENGTH" = "VL"  ,"MESH_SIZE_RANGE","FISHERY" )))
 
             # take care of number of Length classes (max is 100 acc. to JRC template)
             zz<-dim(DISCARDS[-c(1:13)])[2]
@@ -236,7 +237,7 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
 
             if(zz>=100){
                 DISCARDS$LENGTHCLASS100_PLUS<- rowSums(DISCARDS[,!1:113],na.rm = T)
-                DISCARDS<-DISCARDS %>% select(ID:LENGTHCLASS99,LENGTHCLASS100_PLUS)
+                DISCARDS<- suppressWarnings(DISCARDS %>% select(ID:LENGTHCLASS99,LENGTHCLASS100_PLUS))
             }
 
             # FISHERY to DG MARE Med&BS specification

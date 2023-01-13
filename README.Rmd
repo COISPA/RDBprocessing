@@ -16,6 +16,9 @@ knitr::opts_chunk$set(
 )
 
 library(RDBprocessing)
+library(COSTcore)
+library(COSTdbe)
+library(COSTeda)
 
 ```
 

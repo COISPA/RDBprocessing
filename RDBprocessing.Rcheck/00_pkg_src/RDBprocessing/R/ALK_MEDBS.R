@@ -1,7 +1,6 @@
 #' Age Length Key (ALK) table - MED & BS data call
 #'
 #' @param data Detailed data in RCG CS format
-#' @param verbose boolean. If TRUE a message is printed.
 #' @return ALK table
 #' @export
 #' @examples ALK_MEDBS(RDBprocessing::data_ex)
@@ -10,10 +9,23 @@
 #' @import COSTcore COSTeda COSTdbe
 #' @importFrom dplyr group_by filter select summarize mutate_at one_of if_else
 #' @importFrom tidyr gather
+#' @importFrom magrittr %>%
+#' @importFrom plyr .
 
-ALK_MEDBS<-function(data, verbose = FALSE) {
+ALK_MEDBS<-function(data) {
 
-year<-n<-vars<-.<-funs<-Start<-End<-NULL
+if (FALSE) {
+    # library(COSTcore)
+    # library(COSTdbe)
+    # library(COSTeda)
+    # library(dplyr)
+    # library(tidyr)
+    # library(data.table)
+    data <- RDBprocessing::data_ex
+  }
+
+
+. <- year<-n<-Start<-End<-NULL  # vars<-.<-funs<-
 
     data$Age=round(data$Age,0)
     data[is.na(data)]<-""
@@ -30,7 +42,7 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
 
     #data=data[!is.na(data$Age),]
     fri_cs<-RCGtoCOST_CS(data2)
-    LC<- age<- area<- logMsg<- n.at.len<- sex<- spp<- value<-NULL
+    sel_spe <- LC<- age<- area<- logMsg<- n.at.len<- sex<- spp<- value<-NULL
 
     header<-c("COUNTRY","AREA","START_YEAR","END_YEAR","SPECON","SPECIES","SEX","APPLY_TO_CATCHES_FILE","TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE","CV","UNIT","AGE" ,paste("LENGTHCLASS",seq(0,99),sep=""),"LENGTHCLASS100_PLUS","COMMENTS")
 
@@ -61,6 +73,7 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
   sel_spe$COMMENTS <-""
   sel_spe$LC_RANGE <-10
 
+  i=1
   for (i in 1:dim(sel_spe)[1]) {
 
       STK<- sel_spe$SPECIES[i]
@@ -68,7 +81,7 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
       Start<<-sel_spe$START_YEAR[i]
       End<<-sel_spe$END_YEAR[i]
 
-      fri_cs1<- subset(fri_cs, year %in% seq(Start,
+      fri_cs1<- COSTcore::subset(fri_cs, year %in% seq(Start,
                                             End,by=1),table="ca",link=T)
 
       #  estimate sample size (number of otoliths per stock, sex and age)
@@ -76,9 +89,9 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
 
           fri_csv <- csDataVal(fri_cs1)
 
-          nml<- data.frame(fri_cs1@ca) %>% filter(!is.na(age))%>%
+          nml<- suppressMessages ( data.frame(fri_cs1@ca) %>% dplyr::filter(!is.na(age))%>%
               dplyr::group_by(area,spp,age)%>%
-              dplyr::summarize(TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE=n())
+              dplyr::summarize(TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE=n()) )
 
       } else { # ALK for selected sex
 
@@ -86,9 +99,9 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
           fri_csv <- csDataVal(fri_cs1)
 
           # get sample size: number of otoliths
-          nml<- data.frame(fri_cs1@ca) %>% filter(!is.na(age))%>%
+          nml<- suppressMessages ( data.frame(fri_cs1@ca) %>% dplyr::filter(!is.na(age))%>%
               dplyr::group_by(area,spp,age,sex)%>%
-              summarize(TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE=n())
+            dplyr::summarize(TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE=n()) )
 
       }
 
@@ -150,16 +163,16 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
 
       if (sel_spe$SEX[i]=="C"){
 
-          dfALK <-  dfALK %>%
+          dfALK <- suppressWarnings( dfALK %>%
               left_join(nml, by = c("AREA" = 'area', 'SPECIES' = 'spp',"AGE"="age")) %>%
-              dplyr::mutate(SPECIES =  sel_spe$SPE[i])
+              dplyr::mutate(SPECIES =  sel_spe$SPE[i]))
           # FAO Three alpha code
       } else{
 
-          dfALK <-  dfALK %>%
+          dfALK <- suppressWarnings( dfALK %>%
               left_join(nml, by = c("AREA" = 'area', 'SPECIES' = 'spp',"AGE"="age",
                                     "SEX"="sex")) %>%
-              dplyr::mutate(SPECIES =  sel_spe$SPE[i])
+              dplyr::mutate(SPECIES =  sel_spe$SPE[i]) )
           # FAO Three alpha code
 
       }
@@ -211,7 +224,7 @@ year<-n<-vars<-.<-funs<-Start<-End<-NULL
 
       dfALK$UNIT<-UNIT1
 
-      aa1=aa %>%  gather(age, n.at.len, -LC)
+      aa1=aa %>%  tidyr::gather(age, n.at.len, -LC)
 
       aa1 <- as.data.table(aa1)
 #aa$LC
@@ -292,11 +305,18 @@ colnames(alk.temp2)=as.vector(header)
 
       }
 
+      if (i ==1) {
+        alk.temp3 <-  alk.temp2
+      } else {
+        alk.temp3 <- rbind( alk.temp3,  alk.temp2)
+      }
+
   }
 
-  alk.temp2=alk.temp2[alk.temp2$AGE!=-1,]
+  alk.temp3=alk.temp3[alk.temp3$AGE!=-1,]
 
-  alk.temp2[is.na(alk.temp2$CV),]$CV=-1
-return(alk.temp2)
+  alk.temp3[is.na(alk.temp3$CV),]$CV=-1
+
+  return(alk.temp3)
 
 }

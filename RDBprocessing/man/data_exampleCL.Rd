@@ -5,7 +5,7 @@
 \alias{data_exampleCL}
 \title{RCG CL example}
 \format{
-An object of class \code{data.frame} with 35 rows and 22 columns.
+An object of class \code{data.frame} with 35 rows and 11 columns.
 }
 \usage{
 data_exampleCL

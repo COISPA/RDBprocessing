@@ -25,7 +25,7 @@ if (FALSE) {
     data <- RDBprocessing::data_ex
   }
 
-
+    data=check_cs_header(data)
 . <- year<-n<-Start<-End<-NULL  # vars<-.<-funs<-
 
     data$Age=round(data$Age,0)

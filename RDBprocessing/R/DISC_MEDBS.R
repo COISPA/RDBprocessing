@@ -192,7 +192,7 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
                                               funs( ifelse( is.na(.), -1, .) ) )
 
 
-            dt2<- suppressMessages(dplyr::left_join(dt1,ab))
+            dt2<- suppressWarnings(dplyr::left_join(dt1,ab))
             dt2$stock<- STK
 
             ##

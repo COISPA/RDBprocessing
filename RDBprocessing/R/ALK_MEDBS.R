@@ -6,8 +6,8 @@
 #' @examples ALK_MEDBS(RDBprocessing::data_ex)
 #' @importFrom data.table last first between as.data.table
 #' @importFrom stats as.formula
-#' @import COSTcore COSTeda COSTdbe
-#' @importFrom dplyr group_by filter select summarize mutate_at one_of if_else
+#' @import COSTdbe COSTeda COSTcore
+#' @importFrom dplyr group_by filter select summarize mutate_at one_of if_else n
 #' @importFrom tidyr gather
 #' @importFrom magrittr %>%
 #' @importFrom plyr .
@@ -23,7 +23,9 @@ if (FALSE) {
     # library(tidyr)
     # library(data.table)
     data <- RDBprocessing::data_ex
-  }
+    CS=read.table("C:\\RDBprocessing\\da Ioannis\\CS.csv",sep=",",header=T)
+  data=CS
+    }
 
     data=check_cs_header(data)
 . <- year<-n<-Start<-End<-NULL  # vars<-.<-funs<-
@@ -38,18 +40,14 @@ if (FALSE) {
     data2=data2[,c(1:35,40,36:39)]
     colnames(data2)=colnames(RDBprocessing::data_ex)
 
-
+if(any(is.na(data2[data2$Age=="",]$Age))){
     data2[data2$Age=="",]$Age<-NA
+}
 
     #data=data[!is.na(data$Age),]
-    fri_cs<-RCGtoCOST_CS(data2)
+
+
     LC<- age<- area<- logMsg<- n.at.len<- sex<- spp<- value<-NULL
-
-    header<-c("COUNTRY","AREA","START_YEAR","END_YEAR","SPECON","SPECIES","SEX","APPLY_TO_CATCHES_FILE","TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE","CV","UNIT","AGE" ,paste("LENGTHCLASS",seq(0,99),sep=""),"LENGTHCLASS100_PLUS","COMMENTS")
-
-
-    fri_strD <- strIni(spaceStrata="area")
-    COUNTRY<-unique(fri_cs@ca$landCtry)
 
   mat=  aggregate(data$Age,by=list(data$Flag_country,data$Year,data$Sex,data$Area,data$Species),FUN="length")
   colnames(mat)=c("COUNTRY","START_YEAR","SEX","AREA","SPECIES","NB")
@@ -73,22 +71,33 @@ if (FALSE) {
   sel_spe$APPLY_TO_CATCHES_FILE <- "Y"
   sel_spe$COMMENTS <-""
   sel_spe$LC_RANGE <-10
+  header<-c("COUNTRY","AREA","START_YEAR","END_YEAR","SPECON","SPECIES","SEX","APPLY_TO_CATCHES_FILE","TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE","CV","UNIT","AGE" ,paste("LENGTHCLASS",seq(0,99),sep=""),"LENGTHCLASS100_PLUS","COMMENTS")
 
   i=1
-  for (i in 1:dim(sel_spe)[1]) {
-# print(i)
+  for (i in c(1:dim(sel_spe)[1])) {
+
       STK<- sel_spe$SPECIES[i]
 
-      Start<<-sel_spe$START_YEAR[i]
-      End<<-sel_spe$END_YEAR[i]
+      #Start<<-as.numeric()
+      #End<<-as.numeric(sel_spe$END_YEAR[i])
 
-      fri_cs1<- COSTcore::subset(fri_cs, year %in% seq(Start,
-                                            End,by=1),table="ca",link=T)
+      # filter year
+       #     fri_cs1<- subset(fri_cs, year %in% seq(Start,
+                                            # End,by=1),table="ca",link=T)
+
+      data2_temp=data2[as.numeric(data2$year) %in% c(sel_spe$START_YEAR[i]:sel_spe$END_YEAR[i]),]
+
+
 
       #  estimate sample size (number of otoliths per stock, sex and age)
       if (sel_spe$SEX[i]=="C"){
 
-          fri_csv <- csDataVal(fri_cs1)
+          fri_cs1<-RCGtoCOST_CS(data2_temp)
+
+          fri_strD <- strIni(spaceStrata="area")
+          COUNTRY<-unique(fri_cs1@ca$landCtry)
+
+          fri_csv <- COSTcore::csDataVal(fri_cs1)
 
           nml<- suppressMessages ( data.frame(fri_cs1@ca) %>% dplyr::filter(!is.na(age))%>%
               dplyr::group_by(area,spp,age)%>%
@@ -96,20 +105,33 @@ if (FALSE) {
 
       } else { # ALK for selected sex
 
-          fri_cs1=subset(fri_cs1,sex==sel_spe$SEX[i],table="ca",link=T)
-          fri_csv <- csDataVal(fri_cs1)
+         data2_temp= data2_temp[data2_temp$sex==sel_spe$SEX[i],]
+          fri_cs1<-RCGtoCOST_CS(data2_temp)
+          # header<-c("COUNTRY","AREA","START_YEAR","END_YEAR","SPECON","SPECIES","SEX","APPLY_TO_CATCHES_FILE","TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE","CV","UNIT","AGE" ,paste("LENGTHCLASS",seq(0,99),sep=""),"LENGTHCLASS100_PLUS","COMMENTS")
+
+          fri_strD <- strIni(spaceStrata="area")
+          COUNTRY<-unique(fri_cs1@ca$landCtry)
+
+
+          #fri_cs1=COSTcore::subset(fri_cs1,sex==sel_spe$SEX[i],table="ca",link=T)
+
+          fri_csv <- COSTcore::csDataVal(fri_cs1)
+
 
           # get sample size: number of otoliths
           nml<- suppressMessages ( data.frame(fri_cs1@ca) %>% dplyr::filter(!is.na(age))%>%
               dplyr::group_by(area,spp,age,sex)%>%
             dplyr::summarize(TOTAL_NUMBER_OF_HARD_STRUCTURE_READ_BY_AGE=n()) )
 
+
       }
 
 
-      fri_csv1<- subSetSpp(fri_csv, STK)
-      fri_csv1<- subset(fri_csv1, area%in% sel_spe$GSA[i],table="ca",link=T)
+      fri_csv1<- fri_csv #subset(fri_csv, spp == STK,table="ca",link=T) # COSTeda::subSetSpp(fri_csv, STK)
+
+
       fri_csc1 <- suppressWarnings(csDataCons(fri_csv1, fri_strD))
+
 
        ## ### CV from individual length-at-age
       LEstim_An <-
@@ -134,8 +156,9 @@ if (FALSE) {
 
       ## ALK
 
-      res1 <- alkLgthRec(fri_csc1,type=sel_spe$typeALK[i],value=sel_spe$valueALK[i],
-                         update=F, preview=F,postview = F)
+      res1 <- COSTdbe::alkLgthRec(fri_csc1,type=sel_spe$typeALK[i],value=sel_spe$valueALK[i],update=F, preview=F,postview = F)
+
+
 
       if (sel_spe$typeALK[i]=="fillALKmult"){
           fri_csc2 <- fillALKmult(fri_csc1,STK,p=10,trace=T)
@@ -242,8 +265,8 @@ if (FALSE) {
       dt3$age=as.numeric(dt3$age)
 
 
-      dt3<- dt3 %>% mutate_at(vars( -(age) ),
-                              funs( if_else( is.na(.), 0, .) ) )
+      dt3<- suppressWarnings(dt3 %>% mutate_at(vars( -(age) ),
+                              funs( if_else( is.na(.), 0, .) ) ))
 
       dfALK<- suppressMessages (left_join(dfALK,dt3,by=c("AGE"="age")))
 

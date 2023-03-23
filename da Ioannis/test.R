@@ -1,0 +1,20 @@
+remove.packages("RDBprocessing")
+CS=read.table("C:\\RDBprocessing\\da Ioannis\\CS.csv",sep=",",header=T)
+head(CS)
+CL=read.table("C:\\RDBprocessing\\da Ioannis\\CL.csv",sep=",",header=T)
+head(CL)
+CE=read.table("C:\\RDBprocessing\\da Ioannis\\COST.csv",sep=",",header=T)
+head(CE)
+
+library(RDBprocessing)
+library(COSTcore)
+#DISC_MEDBS(CS, CL, CE, verbose = FALSE)
+CL$species=CS$species[1]
+
+LAND_MEDBS(CS, CL, verbose = FALSE)
+CATCH_MEDBS(CS, CL, CE, verbose = FALSE)
+ALK_MEDBS(CS)
+MA_MEDBS(CS)
+ML_MEDBS(CS)
+SRA_MEDBS(CS)
+SRL_MEDBS(CS)

@@ -35,6 +35,7 @@ datacs$Aggregation_level="T"
 }
 
     datacs=check_cs_header(datacs)
+
     . <-.id <- id<- Dis<- FISHERY<- GEAR<- ID<- LANDINGS<- Lan<- MESH_SIZE_RANGE<- NO_AGE_MEASUREMENTS_DISCARDS<- NO_AGE_MEASUREMENTS_LANDINGS <-   NO_LENGTH_MEASUREMENTS_DISCARDS <- NO_LENGTH_MEASUREMENTS_LANDINGS<-   NO_SAMPLES_DISCARDS <- NO_SAMPLES_LANDINGS<- QUARTER<- SPECIES<- VESSEL_LENGTH<- VL<- Year<- age<- area<- catchCat<- foCatEu6<- funs<- gear<- id<-   lenCls<- meanW.at.age<- n <-n.at.age<-  space<- spp<- stock<- technical<-    trpCode<- value<- vars<- year <- NULL
 
     if (nrow(datacs[which(as.numeric(datacs$Age)>=20),])>0)   datacs[datacs$Age>=20,]$Age=20
@@ -783,7 +784,7 @@ colnames(dt3)[c(1,2,3,4,6)]=c("YEAR","QUARTER","AREA","GEAR","VESSEL_LENGTH")
 
 
 
-  catch.temp2<-  suppressWarnings(catch.temp2 %>% select(all_of(header2)))
+  catch.temp2<-  suppressWarnings(catch.temp2 %>% select(dplyr::all_of(header2)))
 
   colnames(catch.temp2)=header
 

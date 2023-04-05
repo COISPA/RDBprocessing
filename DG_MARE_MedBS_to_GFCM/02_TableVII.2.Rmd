@@ -1,0 +1,274 @@
+---
+title: 'Annex II.2 - STREAM: Auxiliary scripts for the conversion from DG MARE Med&BS format
+  to GFCM/DCRF format'
+author: "I. Bitetto"
+date: '`r date()`'
+output: word_document
+---
+
+
+```{r compil, eval=F,include=F,cache=F,echo=F,warning=F,message=F,progress=F,verbose=F}
+#just a reminder to how compile a docx doc
+if(F){
+rmarkdown::render("Data.Rmd",c("word_document"))
+}
+```
+
+
+#Tools
+
+R, Rstudio and packages.
+
+
+```{r results='hide', message=FALSE, warning=FALSE}
+#R general option:
+
+#chunk option
+knitr::opts_chunk$set(cache=TRUE,echo=TRUE, warning=FALSE, 
+	message=FALSE, fig.height=6,progress=FALSE,verbose=FALSE,
+		include=TRUE,dev='png',autodep=FALSE)
+
+#load packages
+library(reshape2)
+library(reshape)
+library(dplyr)
+library(knitr)
+library(pander)
+
+#pander options
+panderOptions('table.split.table', 60)
+panderOptions('table.style', 'grid')
+panderOptions('table.split.cells', 10)
+panderOptions('table.alignment.default', 'left')
+panderOptions('table.alignment.rownames', 'right')
+panderOptions('decimal.mark', ',')
+panderOptions('graph.fontsize', '10')
+
+```
+
+
+
+# script 02: *Table VII.2* 
+
+This script allow to convert the DG MARE Med&BS B_Landings table into the GFCM/DCRF Table VII.2 (Biological information: Length data) using the communication table between fleet segments as defined in GFCM DCRF and metier-LOA as defined within DCF and the primary data in SDEF format
+
+
+##Settings 
+
+```{r data1}
+
+# set the working directory
+myWD <- paste("C:\\Users\\Bitetto Isabella\\OneDrive - Coispa Tecnologia & Ricerca S.C.A.R.L\\MARE22\\STREAM\\FINAL REVISION OF DELIVERABLES\\DG_MARE_MedBS_to_GFCM", sep="")
+setwd(myWD)
+
+Bland=read.table("B_Landings_medbs_example.csv",sep=";",header=T)
+CA=read.table("CA_example.csv",sep=";",header=T)
+TR=read.table("TR_example.csv",sep=";",header=T)
+CT=read.table("Communication_table.csv",sep=";",header=T)
+alpha=read.table("Scientific name to FAO 3alphacode.csv",sep=",",header=T)
+species=read.table("Species TableVII.2.csv",sep=";",header=F)
+
+AREA=99
+
+```
+
+##Input Data
+
+*1) DG MARE Med&BS B_Landings*
+
+```{r data_in2, echo=F}
+pander(head(Bland[, c(1:16, 114)]))
+```
+
+
+*2) Communication table between GFCM/DCRF fleet segments and DCF metier-LOA*
+
+```{r data_in3, echo=F}
+pander(CT)
+```
+
+
+*3) List of species*
+
+```{r data_in4, echo=F}
+pander(species)
+```
+
+*4) Scientific name to FAO 3alphacode*
+
+```{r data_in5, echo=F}
+pander(head(alpha))
+```
+
+*5) SDEF CA table*
+
+```{r data_in6, echo=F}
+pander(head(CA))
+```
+
+*6) SDEF TR table*
+
+```{r data_in7, echo=F}
+pander(head(TR))
+```
+
+
+##Processing tables 
+
+Using some data in the DG MARE Med&BS format :
+
+
+```{r data2}
+
+# selection of the species
+
+Bland=Bland[as.character(Bland$SPECIES) %in% as.character(species[,1]),]     
+
+# Transformation of BLanding
+
+B_melt <- melt(Bland, id=c( "ID" , "COUNTRY", "YEAR" , "QUARTER" ,
+                             "VESSEL_LENGTH" ,"GEAR"  ,"MESH_SIZE_RANGE"  ,"FISHERY" ,
+                             "AREA"  , "SPECON" , "SPECIES" , "LANDINGS" , "UNIT" ))
+                             
+B_melt$variable <-   apply(B_melt, 1, function(x) substring(x[14], 12, nchar(x[14])) )
+B_melt <- B_melt[B_melt$variable != "", ]
+B_melt$variable[B_melt$variable == "100_PLUS"] <- 100
+B_melt$variable <- as.numeric(as.character(B_melt$variable))
+B_melt$value <- as.numeric(as.character(B_melt$value))
+
+#Association of GFCM fleet segment to B Landings
+
+B_melt$GFCM_fleetsegment=as.character(B_melt$GEAR)
+B_melt$GFCM_fleetsegment=""
+
+for (i in 1:nrow(B_melt)){
+if (nrow(CT[as.character(CT$LOA)== as.character(B_melt$VESSEL_LENGTH[i]) & 
+as.character(CT$GEAR_ACatch)== as.character(B_melt$GEAR[i]) & 
+as.character(CT$MESH_SIZE_RANGE_ACatch)== as.character(B_melt$MESH_SIZE_RANGE[i]) & 
+as.character(CT$FISHERY_ACatch)== as.character(B_melt$FISHERY[i]),])>0) {
+  
+B_melt$GFCM_fleetsegment[i]= 
+  as.character(CT[as.character(CT$LOA)== as.character(B_melt$VESSEL_LENGTH[i]) &
+as.character(CT$GEAR_ACatch)== as.character(B_melt$GEAR[i]) &
+as.character(CT$MESH_SIZE_RANGE_ACatch)== as.character(B_melt$MESH_SIZE_RANGE[i]) &
+as.character(CT$FISHERY_ACatch)== as.character(B_melt$FISHERY[i]) ,]$Fleet_segment)
+
+} else {
+    B_melt$GFCM_fleetsegment[i]=""}
+}
+
+B_melt=B_melt[as.character(B_melt$GFCM_fleetsegment)!="",]
+
+B_land1=aggregate(B_melt$value,by=list(B_melt$COUNTRY, 
+                B_melt$YEAR,B_melt$AREA,B_melt$GFCM_fleetsegment,
+                B_melt$SPECIES,B_melt$UNIT,B_melt$variable),FUN="sum")
+B_land1[,3]=AREA
+B_land1$Source_of_data="BS"
+B_land1$Name_of_the_scientific_survey =""
+B_land1=B_land1[,c(1,2,3,9,10,4,5,6,7,8)]
+colnames(B_land1)=c("Country","YEAR","GSA","Source_of_data",
+                    "Name_of_the_scientific_survey",
+                    "GFCM_fleetsegment","SPECIES","Length_unit","Length",
+                    "Number_of_individuals_expanded_per_length_classes")
+
+# only landing should be taken into account, according to the specifications
+
+CA=CA[CA$catchCat=="LAN",]           
+
+# Association of 3alpha code to primary data
+
+CA2 = merge(CA,alpha,by.x="spp",by.y="Scientific")
+colnames(CA2)[ncol(CA2)]="spp2"
+CA2$spp= CA2$spp2
+CA <- CA2[,c(2:15, 1, 16:32)]
+
+length_unit <- unique(data.frame(species = Bland$SPECIES, unit = Bland$UNIT) )
+
+for (nr in 1:nrow(length_unit) ) {
+  if (nrow(CA[as.character(CA$spp) == as.character(length_unit$species[nr]), ]) >0) {
+    if (length_unit$unit[nr] == "cm") {
+      CA$lenCls[as.character(CA$spp) == as.character(length_unit$species[nr])] <- CA$lenCls[as.character(CA$spp) == as.character(length_unit$species[nr])]/10
+    } 
+  }
+}
+
+# association of GFCM fleet segment to primary data
+
+TR_CA=merge(TR,CA,by=c("year","trpCode", "sampType", "landCtry", 
+                       "vslFlgCtry", "proj"),all=F)
+TR_CA$GFCM_fleetsegment=TR_CA$landCtry
+TR_CA$GFCM_fleetsegment=""
+
+TR_CA=TR_CA[,c(1,15,7,25,27,32,33,41,44,45)]
+
+TR_CA$lenCls=round(TR_CA$lenCls,0)
+
+
+for (i in 1:nrow(TR_CA)){
+    if (nrow(CT[as.character(CT$LOA)== as.character(TR_CA$vslLen[i]) & 
+                as.character(CT$METIER)== as.character(TR_CA$foCatEu6[i]) ,])>0) {
+    TR_CA$GFCM_fleetsegment[i]= 
+      as.character(CT[as.character(CT$LOA)== as.character(TR_CA$vslLen[i]) &
+      as.character(CT$METIER)== as.character(TR_CA$foCatEu6[i]) ,]$Fleet_segment)
+    } else {
+        TR_CA$GFCM_fleetsegment[i]=""
+    }
+}
+
+TR_CA=TR_CA[as.character(TR_CA$GFCM_fleetsegment)!="",]
+
+TR_CA <- TR_CA[as.character(TR_CA$spp) %in% as.character(length_unit$species),]
+
+write.table(TR_CA,"TR_CA.csv",sep=";",row.names=F)
+
+agg=aggregate(TR_CA$spp,by=list(TR_CA$year,TR_CA$spp, 
+                                TR_CA$GFCM_fleetsegment,TR_CA$lenCls),FUN="length")
+colnames(agg)=c("YEAR","SPECIES","GFCM_fleetsegment","Length",
+                "Number_of_individuals_sampled")
+
+agg_w=aggregate(TR_CA$indWt,by=list(TR_CA$year,TR_CA$spp, 
+                 TR_CA$GFCM_fleetsegment,TR_CA$lenCls),FUN="mean",na.rm=T)
+colnames(agg_w)=c("YEAR","SPECIES","GFCM_fleetsegment","Length",
+                  "Weight_of_individuals_sampled")
+
+Merg=merge(B_land1,agg,by=c("YEAR","SPECIES","GFCM_fleetsegment","Length"),all.x=T)
+
+Merg2=merge(Merg,agg_w,by=c("YEAR","SPECIES","GFCM_fleetsegment","Length"),all.x=T)
+
+ # conversion in kg
+
+Merg2$Weight_of_individuals_sampled=Merg2$Weight_of_individuals_sampled/1000   
+
+Final=merge(B_land1,Merg2,by=c("YEAR","SPECIES","GFCM_fleetsegment","Length"))
+Final=Final[,c(5,1,6,7,8,3,2,9,4,17,18,16)]
+
+colnames(Final)=c("Country","Reference_year","GSA","Source_of_data",
+                  "Name_of_the_scientific_survey","Fleet_segment","Species",
+                  "Length_unit","Length",
+                  "Number_of_individuals_sampled_per_length_classes",
+                  "Weight_of_individuals_sampled_per_length_classes",
+                  "Number_of_individuals_expanded_per_length_classes")
+
+# Final[Final[, 10] == 0, 10] = NA
+Final[,ncol(Final)]=round(Final[,ncol(Final)]*1000,0)
+
+
+```
+
+
+##Output
+
+*GFCM/DCRF Table VII.2*
+
+
+```{r data_10, echo=F, eval=T}
+Final2 <- Final[with(Final, order(Species,	Reference_year, Fleet_segment, Length) ), ]
+Final2 <- Final2[Final2$Number_of_individuals_expanded_per_length_classes != 0, ]
+
+write.table(Final2,"TableVII.2.csv",sep=";",row.names=F)
+pander(head(Final2))
+
+```
+
+
+

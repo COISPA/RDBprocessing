@@ -1,0 +1,163 @@
+---
+title: 'Annex II.4 - STREAM: Auxiliary scripts for the conversion from DG MARE Med&BS format
+  to GFCM/DCRF format'
+author: "I. Bitetto"
+date: '`r date()`'
+output: word_document
+---
+
+
+```{r compil, eval=F,include=F,cache=F,echo=F,warning=F,message=F,progress=F,verbose=F}
+#just a reminder to how compile a docx doc
+if(F){
+rmarkdown::render("Data.Rmd",c("word_document"))
+}
+```
+
+
+#Tools
+
+R, Rstudio and packages.
+
+
+```{r results='hide', message=FALSE, warning=FALSE}
+#R general option:
+
+#chunk option
+knitr::opts_chunk$set(cache=TRUE,echo=TRUE, warning=FALSE, 
+	message=FALSE, fig.height=6,progress=FALSE,verbose=FALSE,
+		include=TRUE,dev='png',autodep=FALSE)
+
+#load packages
+library(reshape2)
+library(reshape)
+library(dplyr)
+library(knitr)
+library(pander)
+
+#pander options
+panderOptions('table.split.table', 60)
+panderOptions('table.style', 'grid')
+panderOptions('table.split.cells', 10)
+panderOptions('table.alignment.default', 'left')
+panderOptions('table.alignment.rownames', 'right')
+panderOptions('decimal.mark', ',')
+panderOptions('graph.fontsize', '10')
+
+```
+
+
+
+# script 04: *Table VII.3.2* 
+
+This script allow to create the GFCM/DCRF Table VII.3.2 (Biological information: Maturity data) using the GFCM/DCRF Table VII.2 (Biological information: Length data) and the primary data in SDEF format (CA merged with TR)
+
+
+##Settings 
+
+```{r data1}
+
+# set the working directory
+myWD <- paste("C:\\Users\\Bitetto Isabella\\OneDrive - Coispa Tecnologia & Ricerca S.C.A.R.L\\MARE22\\STREAM\\FINAL REVISION OF DELIVERABLES\\DG_MARE_MedBS_to_GFCM", sep="")
+setwd(myWD)
+
+TR_CA=read.table("TR_CA.csv",sep=";",header=T)
+T_VII2=read.table("TableVII.2.csv",sep=";",header=T)
+
+species=read.table("Species TableVII.2.csv",sep=";",header=F)
+
+AREA=10
+
+```
+
+##Input Data
+
+*1) Primary data SDEF format (CA merged with TR)*
+
+```{r data_in2, echo=F}
+pander(head(TR_CA))
+```
+
+
+*2) GFCM/DCRF Table VII.2*
+
+```{r data_in3, echo=F}
+pander(head(T_VII2))
+```
+
+
+
+##Processing tables 
+
+Using some data in the DG MARE Med&BS format :
+
+
+```{r data2}
+
+# selection of the species
+
+TR_CA=TR_CA[as.character(TR_CA$spp) %in% as.character(species[,1]),]     
+
+agg=aggregate(TR_CA$spp,by=list(TR_CA$year,TR_CA$spp,
+      TR_CA$GFCM_fleetsegment,TR_CA$lenCls,TR_CA$sex,TR_CA$matStage),
+      FUN="length")
+colnames(agg)=c("YEAR","SPECIES","GFCM_fleetsegment","Length","Sex",
+                "Maturity","Number_of_individuals_sampled")
+
+agg_w=aggregate(TR_CA$indWt,by=list(TR_CA$year,TR_CA$spp,
+    TR_CA$GFCM_fleetsegment,TR_CA$lenCls,TR_CA$sex,TR_CA$matStage),
+    FUN="mean",na.rm=T)
+colnames(agg_w)=c("YEAR","SPECIES","GFCM_fleetsegment","Length","Sex",
+                  "Maturity", "Weight_of_individuals_sampled")
+
+agg_tot=aggregate(TR_CA$spp,by=list(TR_CA$year,TR_CA$spp,
+    TR_CA$GFCM_fleetsegment,TR_CA$lenCls,TR_CA$sex),FUN="length")
+colnames(agg_tot)=c("YEAR","SPECIES","GFCM_fleetsegment","Length",
+                    "Sex", "Number_of_individuals_sampled")
+
+AGG=merge(agg,agg_tot,by=c("YEAR","SPECIES","GFCM_fleetsegment","Length","Sex"))
+colnames(AGG)[c(7,8)]=c("Numbers_by_sex_stage","Numbers_by_sex")
+
+AGG$Perc_of_stage_in_sex= AGG$Numbers_by_sex_stage/AGG$Numbers_by_sex
+
+Mer=merge(T_VII2, AGG,by.y=c("YEAR","SPECIES","GFCM_fleetsegment","Length"),
+          by.x=c("Reference_year","Species","Fleet_segment","Length"))
+
+Mer$Percentage_of_sex=  Mer$Numbers_by_sex/ Mer$Number_of_individuals_sampled_per_length_classes
+
+
+Mer$Number_of_individuals_expanded= 
+  Mer$Number_of_individuals_expanded_per_length_classes*Mer$Percentage_of_sex*Mer$Perc_of_stage_in_sex
+
+mer2=merge(Mer,agg_w,by.y=c("YEAR","SPECIES","GFCM_fleetsegment","Length","Sex",
+                            "Maturity"),
+           by.x=c("Reference_year","Species","Fleet_segment","Length","Sex",
+                  "Maturity"))
+
+Final=mer2[,c(7,1,8,9,10,3,2,11,4,5,6,15,20,19)]
+Final$Weight_of_individuals_sampled=Final$Weight_of_individuals_sampled/1000
+Final[,ncol(Final)]=round(Final[,ncol(Final)],0)
+
+colnames(Final)=c("Country","Reference_year","GSA","Source_of_data",
+                  "Name_of_the_scientific_survey","Fleet_segment",
+"Species","Length_unit","Length","Sex","Maturity",
+"Number_of_individuals_sampled_(per_length_class_sex_and_maturity_stage)",
+"Weight_of_individuals_sampled_(per_length_class_sex_and_maturity_stage)",
+"Number_of_individuals_expanded_(per_length_class_sex_and_maturity_stage)")
+
+```
+
+
+##Output
+
+*GFCM/DCRF Table VII.3.2*
+
+
+```{r data_10, echo=F, eval=T}
+write.table(Final,"TableVII.3.2.csv",sep=";",row.names=F)
+pander(head(Final))
+
+```
+
+
+

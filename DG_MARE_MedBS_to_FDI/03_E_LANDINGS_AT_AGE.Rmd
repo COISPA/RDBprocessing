@@ -1,0 +1,347 @@
+---
+title: 'Annex I.3 - STREAM: Auxiliary scripts for the conversion from DG MARE Med&BS
+  format to DG MARE FDI format'
+author: "M.T. Facchini and I. Bitetto"
+date: '`r date()`'
+output: word_document
+---
+
+
+```{r compil,eval=F,include=F,cache=F,echo=F,warning=F,message=F,progress=F,verbose=F}
+#just a reminder to how compile a docx doc
+if(F){
+rmarkdown::render("Data.Rmd",c("word_document"))
+}
+```
+
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=F}
+#R general option:
+options(stringsAsFactors = FALSE)
+
+#chunk option
+knitr::opts_chunk$set(cache=TRUE,echo=TRUE, warning=FALSE, 
+	message=FALSE, fig.height=6,progress=FALSE,verbose=FALSE,
+		include=TRUE,dev='png',autodep=FALSE)
+
+#load packages
+library(reshape2)
+library(reshape)
+library(dplyr)
+library(knitr)
+library(pander)
+
+#pander options
+panderOptions('table.split.table', 60)
+panderOptions('table.style', 'grid')
+panderOptions('table.split.cells', 10)
+panderOptions('table.alignment.default', 'left')
+panderOptions('table.alignment.rownames', 'right')
+panderOptions('decimal.mark', ',')
+panderOptions('graph.fontsize', '10')
+
+
+```
+
+
+# script 03: *E_LANDING_AT_AGE*
+
+This script allows to convert the DG MARE Med&BS A_Catch table into the DG MARE FDI E_LANDINGS_AT_AGE using the communication table for the conversion of the FISHERY codes.
+
+
+##Settings 
+
+```{r data1}
+
+# set the working directory
+myWD <- paste("C:\\Users\\Bitetto Isabella\\OneDrive - Coispa Tecnologia & Ricerca S.C.A.R.L\\MARE22\\STREAM\\FINAL REVISION OF DELIVERABLES\\DG_MARE_MedBS_to_FDI", sep="")
+setwd(myWD)
+
+lev5 <- read.csv("./communicationTable_lev5.csv", sep=";")
+loca_A <- read.csv("./A_Catch_example.csv", sep=";")  
+template_E <- read.csv("./TABLE_E_MBS_LANDINGS_AGE.csv", sep=";")
+  
+loca_YEAR <- 9999
+loca_GSA <- "99"
+
+```
+
+##Input Data
+
+1) *DG MARE Med&BS A_Catch*
+
+```{r data_in1, echo=F}
+pander(head(loca_A[,c(1:24)]))
+```
+
+
+2) *Communication table for the FISHERY codes*
+
+```{r data_in2, echo=F}
+pander(lev5)
+```
+
+
+3) *DG MARE FDI E_LANDING_AT_AGE template*
+
+```{r data_in3, echo=F}
+pander(data.frame(E_LANDING_AT_AGE=colnames(template_E)))
+```
+
+
+##Processing tables 
+
+Using some data in the DG MARE Med&BS format :
+
+
+```{r data2}
+
+loca_A_LAN <-  loca_A[,c(1:24)]
+
+# NUMBERS
+Landing_nb_age =  loca_A_LAN
+for (i in 1:20){
+  Landing_nb_age = cbind(Landing_nb_age,loca_A[,colnames(loca_A)==paste("AGE_",i-1,
+                                                                        "_NO_LANDED",sep="")])
+}
+Landing_nb_age = cbind(Landing_nb_age,loca_A[,colnames(loca_A)=="AGE_20_PLUS_NO_LANDED"])
+
+colnames(Landing_nb_age)=c(colnames(loca_A[1:24]),paste("AGE_",c(0:19),"_NO_LANDED",
+                                                        sep=""),"AGE_20_PLUS_NO_LANDED")
+
+Landing_nb_age <- Landing_nb_age[, !( colnames(Landing_nb_age) %in% c("DISCARDS", 
+                                                                      "NO_SAMPLES_DISCARDS", "NO_LENGTH_MEASUREMENTS_DISCARDS", 
+                                                                      "NO_AGE_MEASUREMENTS_DISCARDS", "NO_SAMPLES_CATCH", 
+                                                                      "NO_LENGTH_MEASUREMENTS_CATCH", "NO_AGE_MEASUREMENTS_CATCH",
+                                                                      "NO_LENGTH_MEASUREMENTS_LANDINGS", "SPECON", "ID") )]  
+
+loca_A_melt_NO <- melt(Landing_nb_age, id=c( "COUNTRY", "YEAR" , "QUARTER" , 
+                                             "VESSEL_LENGTH" ,"GEAR"  ,"MESH_SIZE_RANGE"  ,"FISHERY" , 
+                                             "AREA"  , "SPECIES" , "LANDINGS", "NO_SAMPLES_LANDINGS", 
+                                             "NO_AGE_MEASUREMENTS_LANDINGS" , "MIN_AGE", "MAX_AGE" ))
+colnames(loca_A_melt_NO)[ncol(loca_A_melt_NO)] <- "number"
+
+loca_A_melt_NO$variable <-   apply(loca_A_melt_NO, 1, function(x) 
+  ifelse(nchar(x[15]) == 15, substring(x[15], 5, 5) , substring(x[15], 5, 6)))
+
+loca_A_melt_NO$variable <- as.numeric(as.character(loca_A_melt_NO$variable))
+loca_A_melt_NO$number <- as.numeric(as.character(loca_A_melt_NO$number))
+
+# INDIVIDUAL WEIGHTS
+
+Landing_wei_age =  loca_A_LAN
+for (i in 1:20){                                                      
+  Landing_wei_age = cbind(Landing_wei_age,loca_A[,colnames(loca_A)==paste("AGE_",i-1,
+                                                                          "_MEAN_WEIGHT_LANDED",sep="")])
+}
+Landing_wei_age = cbind(Landing_wei_age,loca_A[,colnames(loca_A)==
+                                                 "AGE_20_PLUS_MEAN_WEIGHT_LANDED"])
+colnames(Landing_wei_age)=c(colnames(loca_A[1:24]),paste("AGE_",c(0:19),
+                                                         "_MEAN_WEIGHT_LANDED",sep=""),
+                            "AGE_20_PLUS_MEAN_WEIGHT_LANDED")
+
+Landing_wei_age <- Landing_wei_age[, !( colnames(Landing_wei_age) %in% 
+                                          c("DISCARDS", "NO_SAMPLES_LANDINGS", "NO_SAMPLES_DISCARDS",
+                                            "NO_LENGTH_MEASUREMENTS_DISCARDS", "NO_AGE_MEASUREMENTS_DISCARDS",
+                                            "NO_SAMPLES_CATCH", "NO_LENGTH_MEASUREMENTS_CATCH", 
+                                            "NO_AGE_MEASUREMENTS_CATCH", "NO_LENGTH_MEASUREMENTS_LANDINGS", 
+                                            "SPECON", "ID") )]  
+
+loca_A_melt_WEI <- melt(Landing_wei_age, id=c( "COUNTRY", "YEAR" , "QUARTER" , 
+                                               "VESSEL_LENGTH" ,  "GEAR"  ,"MESH_SIZE_RANGE"  ,"FISHERY", 
+                                               "AREA"  , "SPECIES" , "LANDINGS", "NO_AGE_MEASUREMENTS_LANDINGS", 
+                                               "MIN_AGE", "MAX_AGE" ))
+
+colnames(loca_A_melt_WEI)[ncol(loca_A_melt_WEI)] <- "ind_weight"
+loca_A_melt_WEI$variable <- as.character(loca_A_melt_WEI$variable)
+
+loca_A_melt_WEI$variable <-   apply(loca_A_melt_WEI, 1, function(x) 
+  ifelse(nchar(x[14]) == 24, substring(x[14], 5, 5) , substring(x[14], 5, 6)))
+loca_A_melt_WEI$variable <- as.numeric(as.character(loca_A_melt_WEI$variable))
+loca_A_melt_WEI$ind_weight <- as.numeric(as.character(loca_A_melt_WEI$ind_weight))
+
+loca_A_melt_NO_WEI <- merge(loca_A_melt_NO, loca_A_melt_WEI, by=colnames(loca_A_melt_WEI)
+                            [colnames(loca_A_melt_WEI) != "ind_weight"], all=T )
+loca_A_melt_NO_WEI$ind_weight[loca_A_melt_NO_WEI$ind_weight == -1] <- 0
+
+
+# INDIVIDUAL LENGTHS  
+
+Landing_len_age =  loca_A_LAN
+for (i in 1:20){                                                       
+  Landing_len_age = cbind(Landing_len_age,loca_A[,colnames(loca_A)==paste("AGE_",i-1,
+                                                                          "_MEAN_LENGTH_LANDED",sep="")])
+}
+Landing_len_age = cbind(Landing_len_age,loca_A[,colnames(loca_A)==
+                                                 "AGE_20_PLUS_MEAN_LENGTH_LANDED"])    
+colnames(Landing_len_age)=c(colnames(loca_A[1:24]),paste("AGE_",c(0:19),
+                                                         "_MEAN_LENGTH_LANDED",sep=""),"AGE_20_PLUS_MEAN_LENGTH_LANDED")
+
+Landing_len_age <- Landing_len_age[, !( colnames(Landing_len_age) %in% c("DISCARDS", 
+                                                                         "NO_SAMPLES_LANDINGS", "NO_SAMPLES_DISCARDS", 
+                                                                         "NO_LENGTH_MEASUREMENTS_DISCARDS", "NO_AGE_MEASUREMENTS_DISCARDS", 
+                                                                         "NO_SAMPLES_CATCH", "NO_LENGTH_MEASUREMENTS_CATCH",
+                                                                         "NO_AGE_MEASUREMENTS_CATCH", "NO_LENGTH_MEASUREMENTS_LANDINGS", 
+                                                                         "SPECON", "ID") )]  
+
+loca_A_melt_LEN <- melt(Landing_len_age, id=c( "COUNTRY", "YEAR" , "QUARTER" , 
+                                               "VESSEL_LENGTH" , "GEAR"  ,"MESH_SIZE_RANGE"  ,"FISHERY" , 
+                                               "AREA"  , "SPECIES" , "LANDINGS",
+                                               "NO_AGE_MEASUREMENTS_LANDINGS" , "MIN_AGE", "MAX_AGE" ))
+
+colnames(loca_A_melt_LEN)[ncol(loca_A_melt_LEN)] <- "ind_length"
+
+loca_A_melt_LEN$variable <- as.character(loca_A_melt_LEN$variable)
+loca_A_melt_LEN$variable <-   apply(loca_A_melt_LEN, 1, function(x) 
+  ifelse(nchar(x[14]) == 24, substring(x[14], 5, 5) , substring(x[14], 5, 6)))
+
+loca_A_melt_LEN$variable <- as.numeric(as.character(loca_A_melt_LEN$variable))
+loca_A_melt_LEN$ind_length <- as.numeric(as.character(loca_A_melt_LEN$ind_length))
+
+loca_A_melt_NO_LEN <- merge(loca_A_melt_NO, loca_A_melt_LEN, 
+                            by=colnames(loca_A_melt_LEN)
+                            [colnames(loca_A_melt_LEN) != "ind_length"], all=T )
+
+loca_A_melt_NO_LEN$ind_length[loca_A_melt_NO_LEN$ind_length == -1] <- 0
+
+loca_A_melt_NO_WEI_LEN <- merge(loca_A_melt_NO, merge(loca_A_melt_NO_LEN, 
+                                                      loca_A_melt_NO_WEI, all=T), all=T)
+loca_A_melt_NO_WEI_LEN <- loca_A_melt_NO_WEI_LEN[loca_A_melt_NO_WEI_LEN$number > 0, ]
+loca_A_melt_NO_WEI_LEN$NO_AGE_MEASUREMENTS_LANDINGS[loca_A_melt_NO_WEI_LEN$NO_AGE_MEASUREMENTS_LANDINGS == -1] <- 0
+
+kable(data.frame(Numbers_weights_lengths_from_A_Catch =colnames(loca_A_melt_NO_WEI_LEN)))
+
+#merge with the communication table
+colnames(lev5)[2] <- "FISHERY"
+loca_A_melt_NO_WEI_LEN_2 <- merge(loca_A_melt_NO_WEI_LEN , lev5 )
+
+loca_A_melt_NO_WEI_LEN_2$AREA <- paste(as.numeric(substring(loca_A_melt_NO_WEI_LEN_2$AREA, 4, 5)),sep="")
+
+loca_A_melt_NO_WEI_LEN_2$DOMAIN_LANDINGS <- paste(loca_A_melt_NO_WEI_LEN_2$COUNTRY, 
+                                                  "_", sep="")
+
+loca_A_melt_NO_WEI_LEN_2$DOMAIN_LANDINGS<-apply(loca_A_melt_NO_WEI_LEN_2, 1, function(x) 
+  ifelse(x[4] == -1, paste(x[20], "all_", sep=""), 
+         paste( x[20], as.numeric(as.character(x[4])),"_" , sep="") ) )
+
+loca_A_melt_NO_WEI_LEN_2$DOMAIN_LANDINGS <- with(loca_A_melt_NO_WEI_LEN_2, 
+                                                 paste(DOMAIN_LANDINGS, "GSA", 
+                                                       AREA, "_", GEAR, "_", JRC_FDI_codification ,"_", 
+                                                       MESH_SIZE_RANGE ,  "_NA_NA_" , sep="" )  )   
+
+loca_A_melt_NO_WEI_LEN_2$DOMAIN_LANDINGS<-apply(loca_A_melt_NO_WEI_LEN_2, 1, function(x) 
+  ifelse(x[5] == -1, paste(x[20], "all_", sep=""), 
+         paste( x[20], as.numeric(as.character(x[5])),"_" , sep="") ) )
+
+loca_A_melt_NO_WEI_LEN_2$DOMAIN_LANDINGS <- with(loca_A_melt_NO_WEI_LEN_2, 
+                                                 paste(DOMAIN_LANDINGS, 
+                                                       "all_NK" , sep="" ))  
+
+table_E <- data.frame(COUNTRY = loca_A_melt_NO_WEI_LEN_2$COUNTRY,
+                      YEAR = loca_A_melt_NO_WEI_LEN_2$YEAR,
+                      QUARTER=loca_A_melt_NO_WEI_LEN_2$QUARTER,
+                      SUB_REGION=loca_A_melt_NO_WEI_LEN_2$AREA,
+                      GEAR_TYPE=loca_A_melt_NO_WEI_LEN_2$GEAR,
+                      TARGET_ASSEMBLAGE=loca_A_melt_NO_WEI_LEN_2$JRC_FDI_codification,
+                      DOMAIN_LANDINGS = loca_A_melt_NO_WEI_LEN_2$DOMAIN_LANDINGS,
+                      SPECIES = loca_A_melt_NO_WEI_LEN_2$SPECIES,
+                      TOTWGHTLANDG =  loca_A_melt_NO_WEI_LEN_2$LANDINGS,
+                      NO_SAMPLES_LANDINGS = loca_A_melt_NO_WEI_LEN_2$NO_SAMPLES_LANDINGS,
+                      NO_AGE_MEASUREMENTS_LANDINGS = loca_A_melt_NO_WEI_LEN_2$NO_AGE_MEASUREMENTS_LANDINGS,
+                      MIN_AGE = loca_A_melt_NO_WEI_LEN_2$MIN_AGE,
+                      MAX_AGE = loca_A_melt_NO_WEI_LEN_2$MAX_AGE,
+                      AGE = loca_A_melt_NO_WEI_LEN_2$variable,
+                      NO_LANDS_AGE = loca_A_melt_NO_WEI_LEN_2$number,
+                      MEAN_WEIGHT_LANDS = loca_A_melt_NO_WEI_LEN_2$ind_weight,
+                      MEAN_LENGTH_LANDS = loca_A_melt_NO_WEI_LEN_2$ind_length)
+
+table_E <- table_E[with(table_E, order(COUNTRY, YEAR,  SPECIES, DOMAIN_LANDINGS, AGE)), ]
+table_E$TARGET_ASSEMBLAGE=as.character(table_E$TARGET_ASSEMBLAGE)
+
+table_E$SUB_REGION <- paste("GSA",table_E$SUB_REGION,sep="")
+table_E_props <- table_E 
+
+table_E_props_min_max  <- group_by(table_E, DOMAIN_LANDINGS, SPECIES)
+table_E_props_min_max <- data.frame(summarise(table_E_props_min_max, MIN_AGE= min(AGE) , 
+                                              MAX_AGE= max(AGE) )) 
+
+table_E_props_ages  <- group_by(table_E_props, SPECIES)
+table_E_props_ages <- data.frame(summarise(table_E_props_ages, 
+                                           TOTAL_NO_AGE_MEASUREMENTS_LANDINGS= sum(unique(NO_AGE_MEASUREMENTS_LANDINGS)))) 
+
+table_E_props <- table_E_props[, !( colnames(table_E_props) %in%  
+                                      c("MIN_AGE", "MAX_AGE") ) ]
+final_E <- merge(table_E_props, merge(table_E_props_ages, table_E_props_min_max) )
+
+final_E$AGE_MEASUREMENTS_PROP<-with(final_E, 
+                                    NO_AGE_MEASUREMENTS_LANDINGS/TOTAL_NO_AGE_MEASUREMENTS_LANDINGS)
+
+final_E$NO_AGE_MEASUREMENTS_LANDINGS[final_E$NO_AGE_MEASUREMENTS_LANDINGS == 0 ] <- "NK"
+final_E$AGE_MEASUREMENTS_PROP[final_E$TOTAL_NO_AGE_MEASUREMENTS_LANDINGS == 0 ] <- "NK" 
+
+final_E$NO_AGE_MEASUREMENTS_LANDINGS <-  final_E$TOTAL_NO_AGE_MEASUREMENTS_LANDINGS
+
+final_E_2 <- data.frame(COUNTRY = final_E$COUNTRY ,
+                        YEAR = final_E$YEAR,
+                        QUARTER=final_E$QUARTER,
+                        SUB_REGION=final_E$SUB_REGION,
+                        GEAR_TYPE=final_E$GEAR_TYPE,
+                        TARGET_ASSEMBLAGE=as.character(final_E$TARGET_ASSEMBLAGE),
+                        DOMAIN_LANDINGS = final_E$DOMAIN_LANDINGS ,
+                        SPECIES   = final_E$SPECIES,
+                        TOTWGHTLANDG  = final_E$TOTWGHTLANDG ,
+                        NO_SAMPLES_LANDINGS   = final_E$NO_SAMPLES_LANDINGS ,
+                        NO_AGE_MEASUREMENTS_LANDINGS    = final_E$NO_AGE_MEASUREMENTS_LANDINGS,
+                        AGE_MEASUREMENTS_PROP = final_E$ AGE_MEASUREMENTS_PROP,
+                        MIN_AGE     = final_E$MIN_AGE ,
+                        MAX_AGE   = final_E$MAX_AGE ,
+                        AGE  = final_E$AGE ,
+                        NO_LANDS   = final_E$NO_LANDS_AGE ,
+                        MEAN_WEIGHT  = final_E$MEAN_WEIGHT_LANDS ,
+                        MEAN_LENGTH  = final_E$MEAN_LENGTH_LANDS)
+
+
+final_E_2$NO_AGE <- round(final_E_2$NO_AGE,3)
+final_E_2$TOTWGHTLANDG<- round(as.numeric(as.character(final_E_2$TOTWGHTLANDG)),3)
+
+```
+
+##Output
+
+```{r data_10, eval=T, echo=F}
+
+final_E_2$MEAN_WEIGHT  <- round(as.numeric(as.character(final_E_2$MEAN_WEIGHT)), 3)
+final_E_2$MEAN_LENGTH  <- round(as.numeric(as.character(final_E_2$MEAN_LENGTH)), 1)
+
+final_E_2 <- final_E_2[with(final_E_2, order(COUNTRY, YEAR,  SPECIES, DOMAIN_LANDINGS, AGE)), ]
+
+if(nrow(final_E_2[which(as.character(final_E_2$QUARTER)=="-1"),])>0){
+  final_E_2[which(as.character(final_E_2$QUARTER)=="-1"),]$QUARTER="ALL"
+}
+
+
+if(nrow(final_E_2[which(as.character(final_E_2$QUARTER)=="-1"),])>0){
+final_E_2$TARGET_ASSEMBLAGE=as.character(final_E_2$TARGET_ASSEMBLAGE)
+final_E_2[which(as.character(final_E_2$QUARTER)=="-1"),]$TARGET_ASSEMBLAGE="NK"
+
+final_E_2[which(is.na(final_E_2$TARGET_ASSEMBLAGE)),]$TARGET_ASSEMBLAGE="NK"
+}
+
+
+
+colnames(final_E_2)=colnames(template_E)
+
+final_E_2=final_E_2[,-ncol(final_E_2)]
+
+write.table(final_E_2, file=paste(getwd(), "/E_LANDINGS_AT_AGE.csv", sep=""), sep=";", row.names=F)
+
+
+pander(head(final_E_2))
+
+options(warn=0)
+
+```
+
+
+
+

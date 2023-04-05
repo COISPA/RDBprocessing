@@ -13,6 +13,7 @@
 RCGtoCOST_CS<-function(data, verbose = FALSE){
 
 #path.data=getwd()
+
     data=check_cs_header(data)
 
 CS=data

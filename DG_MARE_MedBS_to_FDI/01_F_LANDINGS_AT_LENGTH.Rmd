@@ -1,0 +1,240 @@
+---
+title: 'Annex I.1 - STREAM: Auxiliary scripts for the conversion from DG MARE Med&BS format
+  to DG MARE FDI format'
+author: "M.T. Facchini and I. Bitetto"
+date: '`r date()`'
+output: word_document
+---
+
+
+```{r compil, eval=F,include=F,cache=F,echo=F,warning=F,message=F,progress=F,verbose=F}
+#just a reminder to how compile a docx doc
+if(F){
+rmarkdown::render("Data.Rmd",c("word_document"))
+}
+```
+
+
+#Tools
+
+R, Rstudio and packages.
+
+
+```{r results='hide', message=FALSE, warning=FALSE}
+#R general option:
+options(stringsAsFactors = FALSE)
+
+#chunk option
+knitr::opts_chunk$set(cache=TRUE,echo=TRUE, warning=FALSE, 
+	message=FALSE, fig.height=6,progress=FALSE,verbose=FALSE,
+		include=TRUE,dev='png',autodep=FALSE)
+
+#load packages
+library(reshape2)
+library(reshape)
+library(dplyr)
+library(knitr)
+library(pander)
+
+#pander options
+panderOptions('table.split.table', 60)
+panderOptions('table.style', 'grid')
+panderOptions('table.split.cells', 10)
+panderOptions('table.alignment.default', 'left')
+panderOptions('table.alignment.rownames', 'right')
+panderOptions('decimal.mark', ',')
+panderOptions('graph.fontsize', '10')
+
+```
+
+
+
+# script 01: *F_LANDINGS_AT_LENGHT* 
+
+This script allows to convert the DG MARE Med&BS B_Landings table into the DG MARE FDI (updated to 2019 formats) F_LANDINGS_AT_LENGTH using the communication table for the conversion of the FISHERY codes and the DG MARE Med&BS A_Catch table for the number of samples and the number of length measurements.
+
+
+##Settings 
+
+```{r data1}
+
+# set the working directory
+myWD <- paste("C:\\Users\\Bitetto Isabella\\OneDrive - Coispa Tecnologia & Ricerca S.C.A.R.L\\MARE22\\STREAM\\FINAL REVISION OF DELIVERABLES\\DG_MARE_MedBS_to_FDI", sep="")
+setwd(myWD)
+
+lev5 <- read.csv("./communicationTable_lev5.csv", sep=";")
+loca_B <- read.csv("./B Landings_example.csv", sep=";")
+loca_A <- read.csv("./A_Catch_example.csv", sep=";")
+template_F <- read.csv("./TABLE_F_MBS_LANDINGS_LENGTH.csv", sep=";")
+  
+loca_YEAR <- 9999
+loca_GSA <- "99"
+
+```
+
+##Input Data
+
+*1) DG MARE Med&BS B_Landings* 
+
+
+```{r data_in1, echo=F}
+pander(head(loca_B[, c(1:16, 114)]))
+
+```
+
+
+
+
+
+*2) DG MARE Med&BS A_Catch*
+
+```{r data_in2, echo=F}
+pander(head(loca_A[, c(1:31, 165:171)]))
+```
+
+
+*3) Communication table for the FISHERY codes*
+
+```{r data_in3, echo=F}
+pander(lev5)
+```
+
+
+*4) DG MARE FDI F_LANDINGS_AT_LENGTH template*
+
+```{r data_in4, echo=F}
+pander(data.frame(TABLE_F_LANDINGS_AT_LENGTH=colnames(template_F)))
+```
+
+
+##Processing tables 
+
+Using some data in the DG MARE Med&BS format :
+
+
+```{r data2}
+
+B_melt <- melt(loca_B, id=c( "ID" , "COUNTRY", "YEAR" , "QUARTER" , 
+                             "VESSEL_LENGTH" ,"GEAR"  ,"MESH_SIZE_RANGE"  ,"FISHERY" , 
+                             "AREA"  , "SPECON" , "SPECIES" , "LANDINGS" , "UNIT" ))
+
+B_melt$variable <-   apply(B_melt, 1, function(x) substring(x[14], 12, nchar(x[14])) )
+
+B_melt <- B_melt[B_melt$variable != "", ]
+
+B_melt$variable[B_melt$variable == "100_PLUS"] <- 100
+
+B_melt$variable <- as.numeric(as.character(B_melt$variable))
+B_melt$value <- as.numeric(as.character(B_melt$value))
+
+
+B_melt <- merge(B_melt, loca_A, by=c("FISHERY", "COUNTRY" , "YEAR", "QUARTER", 
+                                     "VESSEL_LENGTH", "GEAR", "MESH_SIZE_RANGE",  
+                                     "AREA", "SPECIES"), x.all=T)
+# 
+B_melt <- B_melt[,c(1:9, 12:15, 20:21)]
+colnames( B_melt)[colnames( B_melt) == "LANDINGS.x" ] <- "LANDINGS"
+B_melt_length_piene <- B_melt[B_melt$value > 0, ]
+
+# pander(head(B_melt_length_piene[,1:14]))
+
+B_melt_length_piene_min_max <-  group_by(B_melt_length_piene, COUNTRY, YEAR, QUARTER,  
+                                         GEAR, MESH_SIZE_RANGE, FISHERY,  AREA, SPECIES)
+
+B_melt_min_max <- data.frame(summarise(B_melt_length_piene_min_max, 
+                                       LANDING= sum(unique(LANDINGS)), 
+                                       MIN_LENGTH= min(variable), 
+                                       MAX_LENGTH= max(variable) )) 
+
+F_landings <- merge(B_melt_length_piene, B_melt_min_max, all=T)
+
+# pander(head(F_landings[,1:ncol(F_landings)]))
+
+F_landings$AREA <-  paste("GSA",as.numeric(substring(F_landings$AREA , 4,nchar(as.character(F_landings$AREA)))),sep="") 
+
+#merge with the communication table
+colnames(lev5)[2] <- "FISHERY"
+F_landings_2 <- merge(F_landings , lev5 )
+
+F_landings_2$DOMAIN_LANDINGS <- paste(F_landings_2$COUNTRY, "_", sep="")
+F_landings_2$DOMAIN_LANDINGS  <-  apply(F_landings_2, 1, function(x) 
+  ifelse(x[4] == -1, paste(x[20], "all_", sep=""), 
+         paste( x[20], as.numeric(as.character(x[4])),"_" , sep="") ) )
+
+F_landings_2$DOMAIN_LANDINGS <- with(F_landings_2, paste(DOMAIN_LANDINGS, 
+                                                         AREA, "_", GEAR, "_", JRC_FDI_codification ,"_", 
+                                                         MESH_SIZE_RANGE ,  "_NA_NA_" , sep="" )  )   
+
+F_landings_2$DOMAIN_LANDINGS  <-  apply(F_landings_2, 1, function(x) 
+  ifelse(x[9] == -1, paste(x[20], "all_", sep=""), 
+         paste( x[20], as.numeric(as.character(x[9])),"_" , sep="") ) )
+
+F_landings_2$DOMAIN_LANDINGS <- with(F_landings_2, paste(DOMAIN_LANDINGS, 
+                                                         "all_NK" , sep="" )  )   
+
+table_F <- data.frame(with(F_landings_2, cbind(as.character(COUNTRY), 
+                                               cbind( as.numeric(as.character(YEAR)),
+                                                              cbind(as.numeric(as.character((QUARTER))),
+                                                                  cbind(as.character(AREA),
+                                                                        cbind(as.character(GEAR),
+                                                                              cbind(as.character(JRC_FDI_codification),
+                                                                              cbind(as.character(DOMAIN_LANDINGS),
+                                                                            cbind(as.character(SPECIES), 
+                                                                  cbind(as.numeric(as.character(LANDING)),
+                                                                        cbind(as.numeric(as.character(NO_SAMPLES_LANDINGS)), 
+                                                                              cbind( as.numeric(as.character(NO_LENGTH_MEASUREMENTS_LANDINGS)),
+                                                                                     cbind(as.character(UNIT), 
+                                                                                           cbind( as.numeric(as.character(MIN_LENGTH)),
+                                                                                                  cbind(as.numeric(as.character(MAX_LENGTH)), 
+                                                                                                        cbind( as.numeric(as.character(variable)) ,
+                                                                                                               as.numeric(as.character(value)) )))))))))))))))))
+
+colnames(table_F) <- colnames(template_F)
+
+table_F$TARGET_ASSEMBLAGE=as.character(table_F$TARGET_ASSEMBLAGE)
+  
+table_F$NO_LENGTH <- round(as.numeric(as.character(table_F$NO_LENGTH)),3) 
+table_F$TOTWGHTLANDG<- round(as.numeric(as.character(table_F$TOTWGHTLANDG)),3) 
+
+```
+
+
+##Output
+
+*DG MARE FDI F_LANDINGS_AT_LENGTH table*
+
+
+```{r data_10, echo=F, eval=T}
+
+
+table_F2 <- table_F[with(table_F, order(SPECIES,	YEAR, DOMAIN_LANDINGS, LENGTH) ), ]
+
+
+class(table_F2$TARGET_ASSEMBLAGE)="character"
+
+if(nrow(table_F2[which(as.character(table_F2$TARGET_ASSEMBLAGE)=="-1"),])>0){
+  
+  table_F2[which(as.character(table_F2$TARGET_ASSEMBLAGE)=="-1"),]$TARGET_ASSEMBLAGE="NK"
+}
+
+
+if(nrow(table_F2[which(table_F2$QUARTER==-1),])>0){
+  table_F2[which(table_F2$QUARTER==-1),]$QUARTER="ALL"
+}
+
+
+table_F2$QUARTER=as.character(table_F2$QUARTER)
+
+if (nrow(table_F2[which(is.na(table_F2$QUARTER)),])>0){
+table_F2[which(is.na(table_F2$QUARTER)),]$QUARTER="ALL"
+}
+
+write.table(table_F2, file=paste(getwd(), "/F_LANDINGS_AT_LENGTH.csv", sep=""), sep=";", row.names=F)
+
+pander(head(table_F2))
+
+options(warn=0)
+```
+
+
+

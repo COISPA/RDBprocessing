@@ -14,11 +14,11 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 Imports: dplyr, COSTeda, COSTcore, COSTdbe, magrittr, methods,
-        data.table, tidyr, lubridate, plyr
+        data.table, tidyr, lubridate, plyr, reshape2
 Suggests: rmarkdown, knitr, markdown
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-01-16 05:59:50 UTC; Bitetto Isabella
+Packaged: 2023-03-23 11:07:49 UTC; Utente
 Author: Walter Zupa [aut, cre] (<https://orcid.org/0000-0002-2058-8652>)
 Maintainer: Walter Zupa <zupa@coispa.it>
-Built: R 4.1.1; ; 2023-01-16 06:00:04 UTC; windows
+Built: R 4.1.3; ; 2023-03-23 11:07:55 UTC; windows

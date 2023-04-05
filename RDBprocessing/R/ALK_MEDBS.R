@@ -3,7 +3,9 @@
 #' @param data Detailed data in RCG CS format
 #' @return ALK table
 #' @export
-#' @examples ALK_MEDBS(RDBprocessing::data_ex)
+#' @examples
+#' library(COSTcore)
+#' ALK_MEDBS(RDBprocessing::data_ex)
 #' @importFrom data.table last first between as.data.table
 #' @importFrom stats as.formula
 #' @import COSTdbe COSTeda COSTcore

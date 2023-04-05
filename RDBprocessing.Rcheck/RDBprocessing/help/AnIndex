@@ -1,5 +1,6 @@
 ALK_MEDBS	ALK_MEDBS
 Annex17	Annex17
+CATCH_FDI	CATCH_FDI
 CATCH_MEDBS	CATCH_MEDBS
 ce_example	ce_example
 check_cs_header	check_cs_header
@@ -8,6 +9,7 @@ data_exampleCL	data_exampleCL
 DISC_MEDBS	DISC_MEDBS
 fishery	fishery
 fpKey	fpKey
+FT_GEAR	FT_GEAR
 LAND_MEDBS	LAND_MEDBS
 MA_MEDBS	MA_MEDBS
 ML_MEDBS	ML_MEDBS

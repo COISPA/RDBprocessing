@@ -1,0 +1,174 @@
+---
+title: 'Annex II.2 - STREAM: Auxiliary scripts for the conversion from DG MARE Med&BS format
+  to GFCM/DCRF format'
+author: "I. Bitetto"
+date: '`r date()`'
+output: word_document
+---
+
+
+```{r compil, eval=F,include=F,cache=F,echo=F,warning=F,message=F,progress=F,verbose=F}
+#just a reminder to how compile a docx doc
+if(F){
+rmarkdown::render("Data.Rmd",c("word_document"))
+}
+```
+
+
+#Tools
+
+R, Rstudio and packages.
+
+
+```{r results='hide', message=FALSE, warning=FALSE}
+#R general option:
+
+#chunk option
+knitr::opts_chunk$set(cache=TRUE,echo=TRUE, warning=FALSE, 
+	message=FALSE, fig.height=6,progress=FALSE,verbose=FALSE,
+		include=TRUE,dev='png',autodep=FALSE)
+
+#load packages
+library(reshape2)
+library(reshape)
+library(dplyr)
+library(knitr)
+library(pander)
+
+#pander options
+panderOptions('table.split.table', 60)
+panderOptions('table.style', 'grid')
+panderOptions('table.split.cells', 10)
+panderOptions('table.alignment.default', 'left')
+panderOptions('table.alignment.rownames', 'right')
+panderOptions('decimal.mark', ',')
+panderOptions('graph.fontsize', '10')
+
+```
+
+
+
+# script 01: *Table II.2* 
+
+This script allow to convert the DG MARE Med&BS A_Catch table into the GFCM/DCRF Table II.2 (Catch data per species) using the communication table between fleet segments as defined in GFCM DCRF and metier-LOA as defined within DCF
+
+
+##Settings 
+
+```{r data1}
+
+# set the working directory
+myWD <- paste("C:\\Users\\Bitetto Isabella\\OneDrive - Coispa Tecnologia & Ricerca S.C.A.R.L\\MARE22\\STREAM\\FINAL REVISION OF DELIVERABLES\\DG_MARE_MedBS_to_GFCM", sep="")
+setwd(myWD)
+
+ACatch=read.table("A_Catch_medbs_example.csv", sep=";",header=T)
+CT=read.table("Communication_table.csv",sep=";",header=T)
+species=read.table("Species TableII.2.csv",sep=";",header=F)
+
+AREA=99
+
+```
+
+##Input Data
+
+*1) DG MARE Med&BS A_Catch*
+
+```{r data_in2, echo=F}
+pander(head(ACatch[, c(1:31, 165:171)]))
+```
+
+
+*2) Communication table between GFCM/DCRF fleet segments and DCF metier-LOA*
+
+```{r data_in3, echo=F}
+pander(CT)
+```
+
+
+*3) List of species*
+
+```{r data_in4, echo=F}
+pander(species)
+```
+
+
+##Processing tables 
+
+Using some data in the DG MARE Med&BS format :
+
+
+```{r data2}
+
+# Association of GFCM fleet segment to Bland and ACatch tables
+
+# selection of the species
+ACatch=ACatch[as.character(ACatch$SPECIES) %in% as.character(species[,1]),]     
+ACatch=ACatch[,c(2:9,11:13)]
+ACatch_L=aggregate(ACatch$LANDINGS,by=list(ACatch$COUNTRY, ACatch$YEAR, 
+                                  ACatch$VESSEL_LENGTH, ACatch$GEAR,ACatch$MESH_SIZE_RANGE, 
+                                  ACatch$FISHERY, ACatch$AREA, ACatch$SPECIES),FUN="sum")
+ACatch_D=aggregate(ACatch$DISCARDS,by=list(ACatch$COUNTRY, ACatch$YEAR, ACatch$VESSEL_LENGTH,
+                                    ACatch$GEAR,ACatch$MESH_SIZE_RANGE, ACatch$FISHERY, 
+                                    ACatch$AREA, ACatch$SPECIES),FUN="sum")
+
+Merge=merge(ACatch_L,ACatch_D,by=c("Group.1","Group.2","Group.3","Group.4","Group.5",
+                                   "Group.6","Group.7","Group.8"))
+colnames(Merge) =c("COUNTRY", "YEAR", "VESSEL_LENGTH","GEAR", "MESH_SIZE_RANGE","FISHERY",
+                   "AREA", "SPECIES","LANDINGS","DISCARDS")
+Merge$DISCARDS[Merge$DISCARDS<0]=NA
+Merge$GFCM_fleetsegment=as.character(Merge$GEAR)
+Merge$GFCM_fleetsegment=""
+
+for (i in 1:nrow(Merge)){
+if (nrow(CT[as.character(CT$LOA)== as.character(Merge$VESSEL_LENGTH[i]) & 
+            as.character(CT$GEAR_ACatch)== as.character(Merge$GEAR[i]) & 
+            as.character(CT$MESH_SIZE_RANGE_ACatch) == 
+            as.character(Merge$MESH_SIZE_RANGE[i]) & 
+            as.character(CT$FISHERY_ACatch)== as.character(Merge$FISHERY[i]),])>0) {
+  
+Merge$GFCM_fleetsegment[i]= as.character(CT[as.character(CT$LOA)== 
+     as.character(Merge$VESSEL_LENGTH[i]) & 
+     as.character(CT$GEAR_ACatch)== as.character(Merge$GEAR[i]) & 
+     as.character(CT$MESH_SIZE_RANGE_ACatch)== 
+       as.character(Merge$MESH_SIZE_RANGE[i]) & 
+       as.character(CT$FISHERY_ACatch)== 
+       as.character(Merge$FISHERY[i]) ,]$Fleet_segment)
+} else {
+Merge$GFCM_fleetsegment[i]=""}
+}
+
+Merge_noempty=Merge[Merge$GFCM_fleetsegment!="",]
+
+Merge_noempty_L=aggregate(Merge_noempty$LANDINGS,by=list(Merge_noempty$COUNTRY, 
+                                  Merge_noempty$YEAR, Merge_noempty$GFCM_fleetsegment,
+                                  Merge_noempty$SPECIES),FUN="sum")
+Merge_noempty_D=aggregate(Merge_noempty$DISCARDS,by=list(Merge_noempty$COUNTRY, 
+                              Merge_noempty$YEAR, Merge_noempty$GFCM_fleetsegment, 
+                            Merge_noempty$SPECIES),FUN="sum")
+
+Merge=merge(Merge_noempty_L,Merge_noempty_D,by=c("Group.1","Group.2","Group.3",
+                                                 "Group.4"))
+Merge$GSA=AREA
+Merge=Merge[,c(1,2,7,3,4,5,6)]
+Merge$Catch= rowSums(data.frame(col1=Merge[,6],col2=Merge[,7]),na.rm=T)
+colnames(Merge) =c("Country","Reference_year","GSA","Fleet_segment","Species",
+                   "Total_landing_per_species_(tons)","Total_discards_per_species_(tons)",
+                   "Total_catch_per_species")
+
+```
+
+
+##Output
+
+*GFCM/DCRF TableII.2*
+
+
+```{r data_10, echo=F, eval=T}
+
+write.table(Merge,"TableII.2.csv",sep=";",row.names=F)
+pander(head(Merge))
+
+```
+
+
+

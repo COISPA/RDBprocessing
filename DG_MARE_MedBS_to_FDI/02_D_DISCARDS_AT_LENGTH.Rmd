@@ -1,0 +1,263 @@
+---
+title: 'Annex I.2 - STREAM: Auxiliary scripts for the conversion from DG MARE Med&BS
+  format to DG MARE FDI format'
+author: "M.T. Facchini and I. Bitetto"
+date: '`r date()`'
+output: word_document
+---
+
+
+```{r compil,eval=F,include=F,cache=F,echo=F,warning=F,message=F,progress=F,verbose=F}
+#just a reminder to how compile a docx doc
+if(F) {
+rmarkdown::render("Data.Rmd",c("word_document"))
+}
+```
+
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=F}
+#R general option:
+options(stringsAsFactors = FALSE)
+
+#chunk option
+knitr::opts_chunk$set(cache=TRUE,echo=TRUE, warning=FALSE, 
+	message=FALSE, fig.height=6,progress=FALSE,verbose=FALSE,
+		include=TRUE,dev='png',autodep=FALSE)
+
+#load packages
+library(reshape2)
+library(reshape)
+library(dplyr)
+library(knitr)
+library(pander)
+
+#pander options
+panderOptions('table.split.table', 60)
+panderOptions('table.style', 'grid')
+panderOptions('table.split.cells', 10)
+panderOptions('table.alignment.default', 'left')
+panderOptions('table.alignment.rownames', 'right')
+panderOptions('decimal.mark', ',')
+panderOptions('graph.fontsize', '10')
+
+```
+
+
+# script 02: *D_DISCARDS_AT_LENGTH*
+
+This script allows to create the DG MARE FDI D_DISCARDS_AT_LENGTH starting from the DG MARE Med&BS C_Discard tables, the DG MARE Med&BS A_Catch table. The communication table is used for the conversion of the FISHERY codes.
+
+
+##Settings 
+
+```{r data1}
+
+# set the working directory
+myWD <- paste("C:\\Users\\Bitetto Isabella\\OneDrive - Coispa Tecnologia & Ricerca S.C.A.R.L\\MARE22\\STREAM\\FINAL REVISION OF DELIVERABLES\\DG_MARE_MedBS_to_FDI", sep="")
+setwd(myWD)
+
+lev5 <- read.csv("./communicationTable_lev5.csv", sep=";")
+loca_A <- read.csv("./A_Catch_example.csv", sep=";")  
+loca_C <- read.csv("./C Discards_example.csv", sep=";")
+template_D <- read.csv("./TABLE_D_MBS_DISCARDS_LENGTH.csv", sep=";")
+  
+loca_YEAR <- 9999
+loca_GSA <- "99"
+
+```
+
+##Input Data
+
+1) *DG MARE Med&BS C_Discards*
+
+```{r data_in1, echo=F}
+pander(head(loca_C[, c(1:16, 114)]))
+```
+
+2) *DG MARE Med&BS A_Catch*
+
+```{r data_in4, echo=F}
+pander(head(loca_A[, c(1:31, 165:171)]))
+```
+
+
+3) *Communication table for the FISHERY codes*
+
+```{r data_in5, echo=F}
+pander(lev5)
+```
+
+
+4) *DG MARE FDI D_DISCARDS_AT_LENGTH template*
+
+```{r data_in6, echo=F}
+pander(data.frame(D_DISCARDS_AT_LENGTH=colnames(template_D)))
+```
+
+
+##Processing tables 
+
+Using some data in the DG MARE Med&BS format :
+
+
+```{r data2}
+C_melt <- melt(loca_C, id=c( "ID" , "COUNTRY", "YEAR" , "QUARTER" , "VESSEL_LENGTH",
+                             "GEAR"  ,"MESH_SIZE_RANGE"  ,"FISHERY" , "AREA"  ,"SPECON" , 
+                             "SPECIES" , "DISCARDS" , "UNIT" ))
+
+
+C_melt$variable <-   apply(C_melt, 1, function(x) substring(x[14], 12, nchar(x[14])) )
+C_melt$variable[C_melt$variable == "100_PLUS"] <- 100
+C_melt$variable <- as.numeric(as.character(C_melt$variable))
+C_melt$value <- as.numeric(as.character(C_melt$value))
+
+
+C_melt_2 <- data.frame( ID = C_melt$ID,
+                        COUNTRY=C_melt$COUNTRY,
+                        YEAR  = C_melt$YEAR,        
+                        QUARTER  = C_melt$QUARTER,       
+                        VESSEL_LENGTH  = C_melt$VESSEL_LENGTH,   
+                        GEAR = C_melt$GEAR, 
+                        MESH_SIZE_RANGE  = C_melt$MESH_SIZE_RANGE, 
+                        FISHERY  = C_melt$FISHERY,       
+                        AREA    = C_melt$AREA,      
+                        SPECON = C_melt$SPECON, 
+                        SPECIES = C_melt$SPECIES, 
+                        UNWANTED_CATCH = C_melt$DISCARDS, 
+                        UNIT = C_melt$UNIT, 
+                        variable = C_melt$variable, 
+                        value  = C_melt$value) 
+
+
+C_melt_2 <- merge(C_melt_2, loca_A[, 1:21], by=c("ID", "FISHERY", "COUNTRY", "YEAR", 
+                                                 "QUARTER", "VESSEL_LENGTH", "GEAR", "MESH_SIZE_RANGE",  
+                                                 "AREA", "SPECIES"), x.all=T)
+C_melt_2 <- C_melt_2[, c(1:15, 22:23 ) ] 
+colnames(C_melt_2)[16:17] <- c( "NO_SAMPLES_UC", "NO_LENGTH_MEASUREMENTS_UC")
+
+unwanted <- data.frame(C_melt_2)
+
+unwanted$UNWANTED_CATCH[is.na(unwanted$UNWANTED_CATCH) ] <- 0
+
+unwanted_catches <-  group_by(unwanted, ID, COUNTRY, YEAR, QUARTER, VESSEL_LENGTH, 
+                              GEAR, MESH_SIZE_RANGE, FISHERY, AREA, SPECIES, 
+                              UNWANTED_CATCH,  NO_SAMPLES_UC, NO_LENGTH_MEASUREMENTS_UC)
+
+unwanted_catches <- data.frame(summarise(unwanted_catches, 
+                                         no_records = length(UNWANTED_CATCH) ))
+
+unwanted_catches_sum <-  group_by(unwanted_catches, ID, COUNTRY, YEAR, QUARTER, 
+                                  VESSEL_LENGTH, GEAR, MESH_SIZE_RANGE, FISHERY, AREA, SPECIES)
+unwanted_catches_sum <- data.frame(summarise(unwanted_catches_sum, 
+                                             total_unwanted_catch = sum(UNWANTED_CATCH) , 
+                                             total_unwanted_samples = sum(NO_SAMPLES_UC), 
+                                             total_unwanted_length_measurements = sum(NO_LENGTH_MEASUREMENTS_UC) )) 
+
+unwanted_numbers <-  group_by(unwanted, ID, COUNTRY, YEAR, QUARTER, VESSEL_LENGTH, 
+                              GEAR, MESH_SIZE_RANGE, FISHERY, AREA, SPECIES, UNIT, variable )
+
+unwanted_numbers <- data.frame(summarise(unwanted_numbers, 
+                                         NO_LENGTH_UC = sum(value) )) 
+
+
+unwanted_numbers <- unwanted_numbers[unwanted_numbers$NO_LENGTH_UC != 0, ]
+
+D_unwanted_catch_min_max <-  group_by(unwanted_numbers, ID, COUNTRY, YEAR, QUARTER, 
+                                      VESSEL_LENGTH, GEAR,  MESH_SIZE_RANGE, FISHERY,  AREA, 
+                                      SPECIES) 
+
+D_UC_min_max <-  data.frame(summarise(D_unwanted_catch_min_max,   
+                                      MIN_LENGTH= min(variable), 
+                                      MAX_LENGTH= max(variable) )) 
+
+D_UC_min_max$MIN_LENGTH <- round(D_UC_min_max$MIN_LENGTH, 0)
+D_UC_min_max$MAX_LENGTH <- round(D_UC_min_max$MAX_LENGTH, 0)
+
+
+D_UC  <-  merge(unwanted_numbers, D_UC_min_max, by=c("ID", "FISHERY", "COUNTRY" , 
+                                                     "YEAR", "QUARTER", "VESSEL_LENGTH", "GEAR", 
+                                                     "MESH_SIZE_RANGE","AREA", "SPECIES") , all=T) 
+
+D_UC_2  <-  merge(D_UC, unwanted_catches_sum, by=c("ID", "FISHERY", "COUNTRY" , 
+                                                   "YEAR", "QUARTER", "VESSEL_LENGTH", "GEAR", 
+                                                   "MESH_SIZE_RANGE", "AREA", "SPECIES") , all.x=T)
+
+D_UC_2 <- merge(D_UC_2, loca_A[, c(1:9, 11:12)], by=c("ID", "FISHERY", "COUNTRY" , 
+                                                     "YEAR", "QUARTER", "VESSEL_LENGTH", "GEAR",
+                                                      "MESH_SIZE_RANGE", "AREA", "SPECIES") , all.x=T) 
+
+D_UC_2$AREA <-  paste("GSA",as.numeric(substring(D_UC_2$AREA , 4,nchar(as.character(D_UC_2$AREA)))) ,sep="")
+
+#merge with the communication table
+colnames(lev5)[2] <- "FISHERY"
+D_UC_2 <- merge(D_UC_2 , lev5 )
+
+
+D_UC_2$DOMAIN_DISCARDS <- paste(D_UC_2$COUNTRY, "_", sep="")
+D_UC_2$DOMAIN_DISCARDS  <-  apply(D_UC_2, 1, function(x) ifelse(x[5] == -1, paste(x[21],
+                                                                                  "all_", sep=""), paste( x[21], as.numeric(as.character(x[5])),
+                                                                                                          "_" , sep="") ) )
+
+D_UC_2$DOMAIN_DISCARDS <- with(D_UC_2, paste(DOMAIN_DISCARDS, 
+                                             AREA, "_", GEAR, "_", JRC_FDI_codification ,"_", 
+                                             MESH_SIZE_RANGE ,  "_NA_NA_" , sep="" )  )   
+
+D_UC_2$DOMAIN_DISCARDS  <-  apply(D_UC_2, 1, function(x) 
+  ifelse(x[6] == -1, paste(x[21], "all_", sep=""), 
+         paste( x[21], as.numeric(as.character(x[6])),"_" , sep="") ) )
+
+D_UC_2$DOMAIN_DISCARDS <- with(D_UC_2, paste(DOMAIN_DISCARDS, "all_NK" ,
+                                             sep="" )  )   
+
+D_UC_3 <-  data.frame(COUNTRY = D_UC_2$COUNTRY,
+                      YEAR  = D_UC_2$YEAR,
+                      QUARTER=D_UC_2$QUARTER,
+                      SUB_REGION=D_UC_2$AREA,
+                      GEAR_TYPE=D_UC_2$GEAR,
+                      TARGET_ASSEMBLAGE=D_UC_2$JRC_FDI_codification,
+                      DOMAIN_DISCARDS =  D_UC_2$DOMAIN_DISCARDS ,
+                      SPECIES  = D_UC_2$SPECIES,
+                      TOTWGHTLANDG = D_UC_2$LANDINGS,
+                      UNWANTED_CATCH  =  D_UC_2$total_unwanted_catch, 
+                      NO_SAMPLES_UC =   D_UC_2$total_unwanted_samples, 
+                      NO_LENGTH_MEASUREMENTS_UC = D_UC_2$total_unwanted_length_measurements,
+                      LENGTHUNIT =  D_UC_2$UNIT, 
+                      MIN_LENGTH = D_UC_2$MIN_LENGTH, 
+                      MAX_LENGTH = D_UC_2$MAX_LENGTH,
+                      LENGTH = D_UC_2$variable , 
+                      NO_LENGTH_UC = D_UC_2$NO_LENGTH_UC )
+
+
+
+```
+
+
+##Output
+
+```{r data_10, eval=T, echo=F}
+
+D_UC_3$LENGTH <- as.numeric(as.character(D_UC_3$LENGTH))
+D_UC_3 <- D_UC_3[with(D_UC_3, order(SPECIES, YEAR, DOMAIN_DISCARDS, LENGTH) ), ]
+
+D_UC_3[which(as.character(D_UC_3$QUARTER)=="-1"),]$QUARTER="ALL"
+
+D_UC_3$TARGET_ASSEMBLAGE=as.character(D_UC_3$TARGET_ASSEMBLAGE)
+
+if(nrow(D_UC_3[which(as.character(D_UC_3$TARGET_ASSEMBLAGE)=="-1"),])>0){
+D_UC_3[which(as.character(D_UC_3$TARGET_ASSEMBLAGE)=="-1"),]$TARGET_ASSEMBLAGE="NK"
+}
+
+colnames(D_UC_3)=colnames(template_D)
+
+D_UC_3$NO_LENGTH <-round(as.numeric(as.character(D_UC_3$NO_LENGTH)),3) 
+D_UC_3$TOTWGHTLANDG <- round(D_UC_3$TOTWGHTLANDG,3)
+D_UC_3$DISCARDS <- round(D_UC_3$DISCARDS,3)
+
+
+write.table(D_UC_3, file=paste(getwd(), "/D_DISCARDS_AT_LENGTH.csv", sep=""), sep=";", row.names=F)
+
+pander(head(D_UC_3))
+```
+
+
+

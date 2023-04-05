@@ -262,15 +262,17 @@ i=1
 
 
         # FISHERY to DG MARE Med&BS codification
-        LANDINGS$FISHERY <- fishery$SDEF_codification[match(LANDINGS$FISHERY ,
+        LANDINGS$FISHERY <- RDBprocessing::fishery$SDEF_codification[match(LANDINGS$FISHERY ,
                                                             RDBprocessing::fishery$DGMARE_Med_BS_codification)]
 
 
 
         LANDINGS$SPECIES<-RDBprocessing::Annex17$Species[match(LANDINGS$SPECIES ,
                                                           RDBprocessing::Annex17$Scientific_name)]
-        LANDINGS$VESSEL_LENGTH<-RDBprocessing::msr$SDEF_codification_MSR[match(LANDINGS$VESSEL_LENGTH ,
-                                                               RDBprocessing::msr$DGMARE_Med_BS_codification_MSR)]
+
+        LANDINGS$MESH_SIZE_RANGE<-RDBprocessing::msr$DGMARE_Med_BS_codification_MSR[match(LANDINGS$MESH_SIZE_RANGE ,
+                                                               RDBprocessing::msr$SDEF_codification_MSR)]
+
         # species to FAO three alpha code and set ID (COUNTRY, AREA, GEAR, VESSEL_LENGTH,
         # MESH_SIZE_RANGE,QUARTER, SPECIES)
         land.tab <-LANDINGS %>% dplyr::mutate(ID = paste(COUNTRY, AREA, GEAR,FISHERY, VESSEL_LENGTH,
@@ -289,7 +291,8 @@ i=1
 
     #lan.temp2 <- lan.temp2 #[, 2:ncol(lan.temp2)]
 
-    lan.temp2[is.na(lan.temp2$VESSEL_LENGTH),]$VESSEL_LENGTH="NA"
+if(nrow(lan.temp2[is.na(lan.temp2$VESSEL_LENGTH),])>0)
+lan.temp2[is.na(lan.temp2$VESSEL_LENGTH),]$VESSEL_LENGTH="NA"
 
 
     return(lan.temp2)

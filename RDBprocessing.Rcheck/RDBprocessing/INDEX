@@ -1,8 +1,11 @@
 ALK_MEDBS               Age Length Key (ALK) table - MED & BS data call
 Annex17                 Annex 1.7
+CATCH_FDI               CATCH table - FDI data call
 CATCH_MEDBS             Catch at age (CATCH) table - MED & BS data call
 DISC_MEDBS              Discard by length (DISCARDS) table - MED & BS
                         data call
+FT_GEAR                 communication table fishing technique- gear
+                        based on Italian FDI data
 LAND_MEDBS              Landing by length (LANDINGS) table - MED & BS
                         data call
 MA_MEDBS                Maturity at age (MA) table - MED & BS data call

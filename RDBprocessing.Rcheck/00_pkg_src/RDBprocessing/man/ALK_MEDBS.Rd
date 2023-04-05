@@ -16,5 +16,6 @@ ALK table
 Age Length Key (ALK) table - MED & BS data call
 }
 \examples{
+library(COSTcore)
 ALK_MEDBS(RDBprocessing::data_ex)
 }

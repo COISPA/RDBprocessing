@@ -1,0 +1,129 @@
+---
+title: 'Annex II.3 - STREAM: Auxiliary scripts for the conversion from DG MARE Med&BS format
+  to GFCM/DCRF format'
+author: "I. Bitetto"
+date: '`r date()`'
+output: word_document
+---
+
+
+```{r compil, eval=F,include=F,cache=F,echo=F,warning=F,message=F,progress=F,verbose=F}
+#just a reminder to how compile a docx doc
+if(F){
+rmarkdown::render("Data.Rmd",c("word_document"))
+}
+```
+
+
+#Tools
+
+R, Rstudio and packages.
+
+
+```{r results='hide', message=FALSE, warning=FALSE}
+#R general option:
+
+#chunk option
+knitr::opts_chunk$set(cache=TRUE,echo=TRUE, warning=FALSE, 
+	message=FALSE, fig.height=6,progress=FALSE,verbose=FALSE,
+		include=TRUE,dev='png',autodep=FALSE)
+
+#load packages
+library(reshape2)
+library(reshape)
+library(dplyr)
+library(knitr)
+library(pander)
+
+#pander options
+panderOptions('table.split.table', 60)
+panderOptions('table.style', 'grid')
+panderOptions('table.split.cells', 10)
+panderOptions('table.alignment.default', 'left')
+panderOptions('table.alignment.rownames', 'right')
+panderOptions('decimal.mark', ',')
+panderOptions('graph.fontsize', '10')
+
+```
+
+
+
+# script 03: *Table VII.3.1* 
+
+This script allow to convert the DG MARE Med&BS ML table into the GFCM/DCRF Table VII.3.1 (Biological information: Size at first maturity)
+
+
+##Settings 
+
+```{r data1}
+
+# set the working directory
+myWD <- paste("C:\\Users\\Bitetto Isabella\\OneDrive - Coispa Tecnologia & Ricerca S.C.A.R.L\\MARE22\\STREAM\\FINAL REVISION OF DELIVERABLES\\DG_MARE_MedBS_to_GFCM", sep="")
+setwd(myWD)
+
+ML_tab=read.table("ML table.csv",sep=";",header=T)
+species=read.table("Species TableVII.3.1.csv",sep=";",header=F)
+
+AREA=99
+YEAR=9999
+
+```
+
+##Input Data
+
+*1) DG MARE Med&BS ML (Maturity at length)*
+
+```{r data_in2, echo=F}
+pander(head(ML_tab))
+```
+
+
+*2) List of species*
+
+```{r data_in4, echo=F}
+pander(species)
+```
+
+
+##Processing tables 
+
+Using some data in the DG MARE Med&BS format :
+
+
+```{r data2}
+
+# selection of the species
+
+ML_tab=ML_tab[as.character(ML_tab$SPECIES) %in% as.character(species[,1]),] 
+ML_tab_50=ML_tab[ML_tab$PRM<0.60 & ML_tab$PRM>0.4,]
+
+L50=aggregate(ML_tab_50$LENGTHCLASS,
+              by=list(ML_tab_50$COUNTRY,ML_tab_50$START_YEAR,ML_tab_50$END_YEAR,
+                      ML_tab_50$SPECIES,ML_tab_50$SEX),FUN="mean")
+
+L50=L50[L50$Group.2<=YEAR & L50$Group.3>=YEAR,]    # selection on the year
+L50$AREA=AREA
+L50$YEAR=YEAR
+L50$Reference = "" 
+
+Final=L50[,c(1,8,7,4,5,6,9)]                                                                        
+colnames(Final)=c("Country","Reference_year","GSA","Species","Sex","L50","Reference")
+
+
+```
+
+
+##Output
+
+*GFCM/DCRF Table VII.2*
+
+
+```{r data_10, echo=F, eval=T}
+write.table(Final,"TableVII.3.1.csv",sep=";",row.names=F)
+
+pander(head(Final))
+
+```
+
+
+

@@ -8,18 +8,19 @@
 #' @examples LAND_MEDBS(RDBprocessing::data_ex,RDBprocessing::data_exampleCL)
 #' @importFrom stats complete.cases
 #' @import COSTeda
-#' @import COSTcore
 #' @importFrom COSTdbe dbeObject RaiseLgth
-#' @importFrom COSTcore subsetSpp
+#' @import COSTcore
 #' @importFrom dplyr rename left_join bind_rows vars funs
 #' @importFrom plyr round_any
 #' @importFrom data.table as.data.table
 #' @importFrom tidyr separate
 #' @importFrom magrittr %>%
 #' @importFrom stats time
-
+#' @import reshape2
+#'
 LAND_MEDBS<-function(datacs,datacl,verbose=FALSE){
 
+    datacs=check_cs_header(datacs)
 FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUARTER<- SPECIES<- VESSEL_LENGTH<- VL<- Year<- fishery<- gear<- id <- space<- stock<- technical<- value<-.<-NULL
 
 
@@ -82,8 +83,8 @@ i=1
 
         AREA <- sel_spe$GSA[i]
 
-        fri_csc1<- subset(fri_csc, space==sel_spe$GSA[i],table="ca",link=T)
-        fri_clc1<- subset(fri_clc, space==sel_spe$GSA[i],table="cl")
+        fri_csc1<- COSTcore::subset(fri_csc, space==sel_spe$GSA[i],table="ca",link=T)
+        fri_clc1<- COSTcore::subset(fri_clc, space==sel_spe$GSA[i],table="cl")
 
         # The first step is to create the empty object, that will be given
         # the appropriate values for the descritor  fields.
@@ -204,7 +205,7 @@ i=1
 
         ##
 
-        dt3 <- data.table::dcast(dt2,as.formula(paste(paste(names(dt2)[! names(dt2) %in%
+        dt3 <- reshape2::dcast(dt2,as.formula(paste(paste(names(dt2)[! names(dt2) %in%
                                                                            c("length","value")], collapse='+'), "length", sep="~")),
                                  value.var = "value")
 
@@ -218,7 +219,7 @@ i=1
 
         # numbers at LC : NA-->0
         dt3<- dt3 %>% dplyr::mutate_at(dplyr::vars( -(Year:stock) ),
-                                dplyr::funs( dplyr::if_else( is.na(.), 0, .) ) )
+                                list(~ dplyr::if_else( is.na(.), 0, .) ) )
 
 
         LANDINGS <- data.frame(
@@ -245,6 +246,7 @@ i=1
                                                               "GEAR"="gear" ,  "VESSEL_LENGTH" = "VL"  ,
                                                               "MESH_SIZE_RANGE","FISHERY" ))
 )
+        LANDINGS<-LANDINGS[,-14]
         # take care of number of Length classes (max is 100 acc. to DG MARE Med&BS template)
         zz<-dim(LANDINGS[-c(1:13)])[2]
         names(LANDINGS)[-c(1:13)]<- paste("LENGTHCLASS",seq(0,zz-1,1),sep="")
@@ -260,15 +262,17 @@ i=1
 
 
         # FISHERY to DG MARE Med&BS codification
-        LANDINGS$FISHERY <- fishery$SDEF_codification[match(LANDINGS$FISHERY ,
+        LANDINGS$FISHERY <- RDBprocessing::fishery$SDEF_codification[match(LANDINGS$FISHERY ,
                                                             RDBprocessing::fishery$DGMARE_Med_BS_codification)]
 
 
 
         LANDINGS$SPECIES<-RDBprocessing::Annex17$Species[match(LANDINGS$SPECIES ,
                                                           RDBprocessing::Annex17$Scientific_name)]
-        LANDINGS$VESSEL_LENGTH<-RDBprocessing::msr$SDEF_codification_MSR[match(LANDINGS$VESSEL_LENGTH ,
-                                                               RDBprocessing::msr$DGMARE_Med_BS_codification_MSR)]
+
+        LANDINGS$MESH_SIZE_RANGE<-RDBprocessing::msr$DGMARE_Med_BS_codification_MSR[match(LANDINGS$MESH_SIZE_RANGE ,
+                                                               RDBprocessing::msr$SDEF_codification_MSR)]
+
         # species to FAO three alpha code and set ID (COUNTRY, AREA, GEAR, VESSEL_LENGTH,
         # MESH_SIZE_RANGE,QUARTER, SPECIES)
         land.tab <-LANDINGS %>% dplyr::mutate(ID = paste(COUNTRY, AREA, GEAR,FISHERY, VESSEL_LENGTH,
@@ -287,7 +291,8 @@ i=1
 
     #lan.temp2 <- lan.temp2 #[, 2:ncol(lan.temp2)]
 
-    lan.temp2[is.na(lan.temp2$VESSEL_LENGTH),]$VESSEL_LENGTH="NA"
+if(nrow(lan.temp2[is.na(lan.temp2$VESSEL_LENGTH),])>0)
+lan.temp2[is.na(lan.temp2$VESSEL_LENGTH),]$VESSEL_LENGTH="NA"
 
 
     return(lan.temp2)

@@ -16,13 +16,14 @@
 #' @importFrom data.table as.data.table set setDF setDT
 #' @importFrom tidyr separate
 #' @importFrom magrittr %>%
-
+#' @import reshape2
 DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
 
     # datacs=data_ex
     # datacl=data_exampleCL
     # datace=ce_example
 
+    datacs=check_cs_header(datacs)
 
     FISHERY<- GEAR<- ID<- LENGTHCLASS100_PLUS<- LENGTHCLASS99<- MESH_SIZE_RANGE<-QUARTER<- SPECIES<- VESSEL_LENGTH<- VL<- Year<- fishery<- gear<- id <- space<- stock<- technical<- value<-.<-NULL
 
@@ -180,25 +181,25 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
 
             dt1<- dt[, list(length = seq_l), by = id]
 
-            dt1<- suppressWarnings(dt1 %>% separate(id, c("time", "space", "gear", "FISHERY","VL",
+            dt1<- suppressMessages(dt1 %>% separate(id, c("time", "space", "gear", "FISHERY","VL",
                                          "MESH_SIZE_RANGE"), sep = ":"))
 
             ab[is.na(ab)]<- -1
             class(dt1$VL)<-"numeric"
 
             # ab[,`1:6]: NA-->-1
-            ab<- ab %>%ungroup()%>% mutate_at(vars(c(time:MESH_SIZE_RANGE) ),
-                                              funs( ifelse( is.na(.), -1, .) ) )
+            ab<- suppressWarnings(ab %>%ungroup()%>% mutate_at(vars(c(time:MESH_SIZE_RANGE) ),
+                                              funs( ifelse( is.na(.), -1, .)) ) )
 
 
-            dt2<- suppressMessages(dplyr::left_join(dt1,ab))
+            dt2<- suppressWarnings(dplyr::left_join(dt1,ab))
             dt2$stock<- STK
 
             ##
 
-            dt3 <- data.table::dcast(dt2,as.formula(paste(paste(names(dt2)[! names(dt2) %in%
+            dt3 <- suppressWarnings(reshape2::dcast(dt2,as.formula(paste(paste(names(dt2)[! names(dt2) %in%
                                                                                c("length","value")], collapse='+'), "length", sep="~")),
-                                     value.var = "value")
+                                     value.var = "value"))
 
             dt3=dt3[complete.cases(dt3[,c(7:9)]), ]
 
@@ -208,8 +209,8 @@ DISC_MEDBS<-function(datacs,datacl, datace, verbose=FALSE){
 
 
             # numbers at LC : NA-->0
-            dt3<- dt3 %>% mutate_at(vars( -(Year:stock) ),
-                                    funs( if_else( is.na(.), 0, .) ) )
+            dt3<- suppressWarnings(dt3 %>% mutate_at(vars( -(Year:stock) ),
+                                    funs( if_else( is.na(.), 0, .) ) ))
 
             DISCARDS <- data.frame(
 

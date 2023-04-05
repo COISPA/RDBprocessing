@@ -6,7 +6,7 @@
 #' @examples SRL_MEDBS(RDBprocessing::data_ex)
 #' @importFrom stats aggregate
 SRL_MEDBS<-function(data, verbose = FALSE) {
-
+    data=check_cs_header(data)
     header=c("COUNTRY","AREA","START_YEAR","END_YEAR","SPECIES","LENGTHCLASS","UNIT","SEX_RATIO","COMMENTS")
 
     data=data[-which(data$Sex %in%c(NA,-1,0,"","U","C","N","I")),]

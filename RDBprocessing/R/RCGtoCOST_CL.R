@@ -32,9 +32,18 @@ RCGtoCOST_CL<-function(data, verbose = FALSE){
     names(CL)[which(tolower(names(CL)) ==
                         "fishing.activity.category.national")] <- "foCatNat"
     names(CL)[which(tolower(names(CL)) == "fac_national")] <- "foCatNat"
+    names(CL)[which(tolower(names(CL)) ==
+                        "fishing_activity_category_national")] <- "foCatNat"
+
+
+
+
+
 
     names(CL)[which(tolower(names(CL)) ==
                         "fishing.activity.category.european.lvl.6")] <- "foCatEu6"
+    names(CL)[which(tolower(names(CL)) ==
+                        "fishing_activity_category_eu_l6")] <- "foCatEu6"
     names(CL)[which(tolower(names(CL)) == "fac_ec_lvl6")] <- "foCatEu6"
 
     names(CL)[which(tolower(names(CL)) == "harbour")] <- "harbour"

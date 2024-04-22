@@ -4,12 +4,12 @@
 \alias{TabII2_GFCM}
 \title{Table II.2  - GFCM DCRF data call}
 \usage{
-TabII2_GFCM(CatchFDI, verbose = FALSE)
+TabII2_GFCM(ACatch, verbose = FALSE)
 }
 \arguments{
-\item{CatchFDI}{Catch table FDI}
-
 \item{verbose}{boolean. If TRUE a message is printed.}
+
+\item{CatchFDI}{Catch table FDI}
 }
 \value{
 Table II.2 GFCM DCRF table

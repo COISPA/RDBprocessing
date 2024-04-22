@@ -75,8 +75,10 @@ for (i in 1:nrow(B_melt)){
         B_melt$GFCM_fleetsegment[i]=""}
 }
 
-B_melt=B_melt[as.character(B_melt$GFCM_fleetsegment)!="",]
 
+
+B_melt=B_melt[as.character(B_melt$GFCM_fleetsegment)!="",]
+if (nrow(B_melt)>1){
 B_land1=aggregate(B_melt$value,by=list(B_melt$COUNTRY,
                                        B_melt$YEAR,B_melt$AREA,B_melt$GFCM_fleetsegment,
                                        B_melt$SPECIES,B_melt$UNIT,B_melt$variable),FUN="sum")
@@ -174,4 +176,9 @@ Final2 <- Final[with(Final, order(Species,	Reference_year, Fleet_segment, Length
 Final2 <- Final2[Final2$Number_of_individuals_expanded_per_length_classes != 0, ]
 
 return(Final2)
+} else {
+    print("No correspondence between FDI and GFCM fleet segments in the dataset",quote=F)
+
+    return(0)}
+
 }

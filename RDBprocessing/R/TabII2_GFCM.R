@@ -12,11 +12,11 @@
 #'@import dplyr
 
 
-TabII2_GFCM <- function(CatchFDI,verbose=FALSE) {
+TabII2_GFCM <- function(ACatch,verbose=FALSE) {
 
     if(FALSE){
     #ACatch =CATCH_MEDBS(RDBprocessing::data_ex,RDBprocessing::data_exampleCL,RDBprocessing::ce_example,verbose=F)
-    ACatch=RDBprocessing::CATCH_FDIex
+    ACatch=A_CATCH # RDBprocessing::CATCH_FDIex
 
     }
 
@@ -63,11 +63,13 @@ for (i in 1:nrow(Merge)){
         Merge$GFCM_fleetsegment[i]=""}
 }
 
-Merge_noempty=Merge[Merge$GFCM_fleetsegment!="",]
 
+Merge_noempty=Merge[Merge$GFCM_fleetsegment!="",]
+if(nrow(Merge_noempty)>1){
 Merge_noempty_L=aggregate(Merge_noempty$LANDINGS,by=list(Merge_noempty$COUNTRY,
                                                          Merge_noempty$YEAR, Merge_noempty$GFCM_fleetsegment,
                                                          Merge_noempty$SPECIES),FUN="sum")
+
 Merge_noempty_D=aggregate(Merge_noempty$DISCARDS,by=list(Merge_noempty$COUNTRY,
                                                          Merge_noempty$YEAR, Merge_noempty$GFCM_fleetsegment,
                                                          Merge_noempty$SPECIES),FUN="sum")
@@ -82,7 +84,10 @@ Merge$Catch= rowSums(data.frame(col1=Merge[,6],col2=Merge[,7]),na.rm=T)
 colnames(Merge) =c("Country","Reference_year","GSA","Fleet_segment","Species",
                    "Total_landing_per_species_(tons)","Total_discards_per_species_(tons)",
                    "Total_catch_per_species")
-
 return(Merge)
+} else {
+    print("No correspondence between FDI and GFCM fleet segments in the dataset",quote=F)
+}
+
 
 }

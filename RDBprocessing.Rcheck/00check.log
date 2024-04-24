@@ -38,4 +38,70 @@ la chiamata 'library' o 'require' a 'COSTcore' nel codice del pacchetto.
 * checking S3 generic/method consistency ... OK
 * checking replacement functions ... OK
 * checking foreign function calls ... OK
-* checking R code for possible problems ...
+* checking R code for possible problems ... [31s] NOTE
+-------------------------------------------------------------------
+ COSTcore - "The DCF Statistical Suite"
+ (Version: 1.4-0. Built on: R 4.2.0; ; 2024-04-10 12:32:27 UTC; windows)
+-------------------------------------------------------------------
+CATCH_MEDBS: warning in set(catch.temp2, i = which(catch.temp2[[jj]] ==
+  -1), j = jj, v = 0): confronto argomento parziale di 'v' con 'value'
+TableVII2: no visible binding for global variable 'CT'
+TableVII2: no visible binding for global variable 'alpha'
+TableVII2: no visible global function definition for 'write.table'
+Undefined global functions or variables:
+  CT alpha write.table
+Consider adding
+  importFrom("utils", "write.table")
+to your NAMESPACE file.
+
+Found if() conditions comparing class() to string:
+File 'RDBprocessing/R/CATCH_MEDBS.R': if (class(seq_l) == "try-error") ...
+Use inherits() (or maybe is()) instead.
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd line widths ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... WARNING
+Argomenti non documentati nell'oggetto documentazione 'TabII2_GFCM'
+  'ACatch'
+Argomenti documentati non in \usage nell'oggetto documentazione 'TabII2_GFCM':
+  'CatchFDI'
+
+Functions with \usage entries need to have the appropriate \alias
+entries, and all their arguments documented.
+The \usage entries must correspond to syntactically valid R code.
+See chapter 'Writing R documentation files' in the 'Writing R
+Extensions' manual.
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking contents of 'data' directory ... OK
+* checking data for non-ASCII characters ... OK
+* checking LazyData ... OK
+* checking data for ASCII and uncompressed saves ... OK
+* checking examples ... [23s] ERROR
+Running examples in 'RDBprocessing-Ex.R' failed
+The error most likely occurred in:
+
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: CATCH_MEDBS
+> ### Title: Catch at age (CATCH) table - MED & BS data call
+> ### Aliases: CATCH_MEDBS
+> 
+> ### ** Examples
+> 
+> CATCH_MEDBS(RDBprocessing::data_ex,RDBprocessing::data_exampleCL,RDBprocessing::ce_example)
+[1] No rows TR = 139
+[1] No rows HH = 139
+[1] No rows SL = 799
+[1] No rows HL = 6040
+[1] No rows CA = 6587
+Error in subsetSpp(csObject, spp %in% "Mullus barbatus") : 
+  could not find function "subsetSpp"
+Calls: CATCH_MEDBS ... RaiseLgth -> RaiseLgth -> Raise_Lgth -> eval -> eval
+Execution halted
+* checking for non-standard things in the check directory ... OK
+* checking for detritus in the temp directory ... OK
+* DONE
+Status: 1 ERROR, 1 WARNING, 2 NOTEs

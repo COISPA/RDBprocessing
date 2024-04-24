@@ -1,0 +1,41 @@
+* using log directory 'C:/Users/Utente/OneDrive - Coispa Tecnologia & Ricerca S.C.A.R.L/CINEA/RDBFIS II/RDBprocessing/sincronizzato con github/RDBprocessing/RDBprocessing.Rcheck'
+* using R version 4.2.3 (2023-03-15 ucrt)
+* using platform: x86_64-w64-mingw32 (64-bit)
+* using session charset: UTF-8
+* using options '--no-manual --as-cran'
+* checking for file 'RDBprocessing/DESCRIPTION' ... OK
+* this is package 'RDBprocessing' version '0.0.2'
+* package encoding: UTF-8
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking whether package 'RDBprocessing' can be installed ... [20s] OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking for future file timestamps ... OK
+* checking DESCRIPTION meta-information ... OK
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking dependencies in R code ... NOTE
+chiamata 'library' o 'require' non dichiarata da: 'COSTcore'
+la chiamata 'library' o 'require' a 'COSTcore' nel codice del pacchetto.
+  Please use :: or requireNamespace() instead.
+  See section 'Suggested packages' in the 'Writing R Extensions' manual.
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ...

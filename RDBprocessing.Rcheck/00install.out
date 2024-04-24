@@ -1,0 +1,58 @@
+* installing *source* package 'RDBprocessing' ...
+** using staged installation
+** R
+** data
+*** moving datasets to lazyload DB
+** byte-compile and prepare package for lazy loading
+-------------------------------------------------------------------
+ COSTcore - "The DCF Statistical Suite"
+ (Version: 1.4-0. Built on: R 4.2.0; ; 2024-04-10 12:32:27 UTC; windows)
+-------------------------------------------------------------------
+Avvertimento: sostituzione dell'importazione precedente 'COSTcore::desc' con 'dplyr::desc' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'dplyr::rename' con 'reshape::rename' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::recast' con 'reshape2::recast' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::melt' con 'reshape2::melt' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::colsplit' con 'reshape2::colsplit' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::expand' con 'tidyr::expand' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'dplyr::between' con 'data.table::between' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'dplyr::first' con 'data.table::first' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'dplyr::last' con 'data.table::last' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::rename' con 'dplyr::rename' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::round_any' con 'plyr::round_any' durante il caricamento di 'RDBprocessing'
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded from temporary location
+-------------------------------------------------------------------
+ COSTcore - "The DCF Statistical Suite"
+ (Version: 1.4-0. Built on: R 4.2.0; ; 2024-04-10 12:32:27 UTC; windows)
+-------------------------------------------------------------------
+Avvertimento: sostituzione dell'importazione precedente 'COSTcore::desc' con 'dplyr::desc' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'dplyr::rename' con 'reshape::rename' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::recast' con 'reshape2::recast' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::melt' con 'reshape2::melt' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::colsplit' con 'reshape2::colsplit' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::expand' con 'tidyr::expand' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'dplyr::between' con 'data.table::between' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'dplyr::first' con 'data.table::first' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'dplyr::last' con 'data.table::last' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::rename' con 'dplyr::rename' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::round_any' con 'plyr::round_any' durante il caricamento di 'RDBprocessing'
+** testing if installed package can be loaded from final location
+-------------------------------------------------------------------
+ COSTcore - "The DCF Statistical Suite"
+ (Version: 1.4-0. Built on: R 4.2.0; ; 2024-04-10 12:32:27 UTC; windows)
+-------------------------------------------------------------------
+Avvertimento: sostituzione dell'importazione precedente 'COSTcore::desc' con 'dplyr::desc' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'dplyr::rename' con 'reshape::rename' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::recast' con 'reshape2::recast' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::melt' con 'reshape2::melt' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::colsplit' con 'reshape2::colsplit' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::expand' con 'tidyr::expand' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'dplyr::between' con 'data.table::between' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'dplyr::first' con 'data.table::first' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'dplyr::last' con 'data.table::last' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::rename' con 'dplyr::rename' durante il caricamento di 'RDBprocessing'
+Avvertimento: sostituzione dell'importazione precedente 'reshape::round_any' con 'plyr::round_any' durante il caricamento di 'RDBprocessing'
+** testing if installed package keeps a record of temporary installation path
+* DONE (RDBprocessing)
